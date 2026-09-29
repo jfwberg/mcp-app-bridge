@@ -7,8 +7,8 @@ This page records observed interoperability results for MCP App Bridge. It disti
 | Client/host | Observed MCP flow | Response profile | Tool and authentication status | Embedded UI status |
 | --- | --- | --- | --- | --- |
 | ChatGPT (`openai-mcp/1.0.0`) | `2026-07-28` using `server/discover` | Sessionless completed SSE `message` responses | End-to-end verified: discovery, tool calls, bootstrap, frontdoor authentication, and follow-up actions | Working end to end |
-| Slack (`Slack-MCP-Client/1.0`) | `2025-06-18` using `initialize` | Stateless-compatible completed SSE `message` responses | Initialization, tool discovery, tool invocation, and frontdoor generation verified | Blocked by the Slack host CSP `frame-src 'none'`; this is not an MCP App Bridge failure |
-| Claude | Legacy MCP initialize/tool flow | Legacy-compatible transport | Discovery, tool invocation, and valid frontdoor authentication verified | The observed host CSP does not permit the nested Salesforce iframe; this is not an MCP App Bridge failure |
+| Slack (`Slack-MCP-Client/1.0`) | `2025-06-18` using `initialize` | Stateless-compatible completed SSE `message` responses | Initialization, tool discovery, tool invocation, and frontdoor generation verified | Working End to End. Note: By default frame are blocked by the Slack host CSP `frame-src 'none'`; You need to contact support to change this setting |
+| Claude | Legacy MCP initialize/tool flow | Legacy-compatible transport | Discovery, tool invocation, and valid frontdoor authentication verified. Note: OAuth requires a token proxy due to strict OAuth 2.1 implementation | The observed host CSP does not permit the nested Salesforce iframe; this is not an MCP App Bridge failure, No solution as of yet |
 | Microsoft 365/Copilot hosts | Not yet tested | To be determined from the client request | Not yet verified | Not yet verified |
 
 These results describe the tested host versions and can change when a host updates its MCP implementation or CSP.
