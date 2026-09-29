@@ -1,0 +1,25 @@
+{
+  "packageDirectories": [
+    {
+      "versionName": "v67.0 - 0.1",
+      "versionNumber": "0.1.0.NEXT",
+      "path": "force-app",
+      "default": true,
+      "package": "MCP App Bridge",
+      "versionDescription": "A flexible, configuration-driven bridge that exposes Lightning Web Components as MCP Apps through Lightning Out 2.0 and a native Apex REST transport."
+    }
+  ],
+  "name": "mcp-app-bridge",
+  "namespace": "mcpapp",
+  "sfdcLoginUrl": "https://login.salesforce.com",
+  "sourceApiVersion": "67.0",
+  "packageAliases": {
+    "MCP App Bridge": "0HoP3000000021pKAA",
+    "MCP App Bridge@0.1.0-1": "04tP3000002DRfZIAW",
+    "MCP App Bridge@0.1.0-2": "04tP3000002DSWnIAO",
+    "MCP App Bridge@0.1.0-3": "04tP3000002DUgfIAG",
+    "MCP App Bridge@0.1.0-5": "04tP3000002DVUfIAO",
+    "MCP App Bridge@0.1.0-6": "04tP3000002DmbxIAC",
+    "MCP App Bridge@0.1.0-7": "04tP3000002Dt5ZIAS"
+  }
+}

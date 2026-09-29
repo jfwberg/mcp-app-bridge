@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label>MCP App Bridge Event Mapping</label>
+    <pluralLabel>MCP App Bridge Event Mappings</pluralLabel>
+    <visibility>Public</visibility>
+</CustomObject>

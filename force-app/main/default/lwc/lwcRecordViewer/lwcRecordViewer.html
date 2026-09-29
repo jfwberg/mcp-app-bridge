@@ -1,0 +1,21 @@
+<template>
+    <lightning-card title="MCP Record Viewer" icon-name="standard:record">
+        <div class="slds-var-p-horizontal_medium">
+            <template lwc:if={errorMessage}>
+                <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">{errorMessage}</div>
+            </template>
+            <template lwc:if={hasRecords}>
+                <lightning-datatable key-field="Id" data={records} columns={columns} hide-checkbox-column></lightning-datatable>
+                <lightning-button class="slds-var-m-top_medium" variant="brand" label="Send Table Data to Chat" onclick={sendToChat}></lightning-button>
+                <p lwc:if={dispatchMessage} class="slds-var-m-top_small slds-text-color_success">{dispatchMessage}</p>
+            </template>
+            <template lwc:else>No records are available.</template>
+            <details lwc:if={hasActivity} class="slds-var-m-top_large">
+                <summary>Bridge Activity ({activity.length})</summary>
+                <template for:each={activity} for:item="entry">
+                    <div key={entry.id} class="log-entry"><strong>{entry.label}</strong><pre>{entry.detail}</pre></div>
+                </template>
+            </details>
+        </div>
+    </lightning-card>
+</template>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Layout xmlns="http://soap.sforce.com/2006/04/metadata">
+    <layoutSections><customLabel>false</customLabel><detailHeading>false</detailHeading><editHeading>true</editHeading><label>Information</label>
+        <layoutColumns><layoutItems><behavior>Required</behavior><field>MasterLabel</field></layoutItems><layoutItems><behavior>Required</behavior><field>DeveloperName</field></layoutItems><layoutItems><behavior>Edit</behavior><field>IsProtected</field></layoutItems><layoutItems><behavior>Required</behavior><field>NamespacePrefix</field></layoutItems><layoutItems><behavior>Edit</behavior><field>Enabled__c</field></layoutItems><layoutItems><behavior>Edit</behavior><field>Lightning_Out_Config__c</field></layoutItems></layoutColumns>
+        <layoutColumns><layoutItems><behavior>Edit</behavior><field>Direction__c</field></layoutItems><layoutItems><behavior>Edit</behavior><field>LWC_Event_Name__c</field></layoutItems><layoutItems><behavior>Edit</behavior><field>Host_Action__c</field></layoutItems><layoutItems><behavior>Edit</behavior><field>Max_Payload_Characters__c</field></layoutItems></layoutColumns><style>TwoColumnsTopToBottom</style>
+    </layoutSections>
+    <layoutSections><customLabel>false</customLabel><detailHeading>false</detailHeading><editHeading>true</editHeading><label>Host Message</label><layoutColumns><layoutItems><behavior>Edit</behavior><field>LLM_Instructions__c</field></layoutItems></layoutColumns><layoutColumns/><style>TwoColumnsTopToBottom</style></layoutSections>
+    <layoutSections><customLabel>false</customLabel><detailHeading>false</detailHeading><editHeading>true</editHeading><label>Inbound MCP Tool</label>
+        <layoutColumns><layoutItems><behavior>Edit</behavior><field>MCP_Tool_Name__c</field></layoutItems><layoutItems><behavior>Edit</behavior><field>Tool_Title__c</field></layoutItems><layoutItems><behavior>Edit</behavior><field>Tool_Description__c</field></layoutItems></layoutColumns>
+        <layoutColumns><layoutItems><behavior>Edit</behavior><field>Input_Schema_JSON__c</field></layoutItems></layoutColumns><style>TwoColumnsTopToBottom</style>
+    </layoutSections>
+</Layout>

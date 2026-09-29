@@ -1,0 +1,39 @@
+<template>
+    <lightning-card title={headingText} icon-name="standard:record_create">
+        <div class="slds-var-p-horizontal_medium">
+            <template lwc:if={errorMessage}>
+                <div class="slds-notify slds-notify_alert slds-alert_error slds-var-m-bottom_medium" role="alert">{errorMessage}</div>
+            </template>
+            <template for:each={rows} for:item="row">
+                <section key={row.key} class="slds-box slds-var-m-bottom_medium">
+                    <h3 class="slds-text-heading_small slds-var-m-bottom_small">Record {row.number}</h3>
+                    <template for:each={row.fields} for:item="field">
+                        <lightning-combobox lwc:if={field.options.length} key={field.key}
+                            class="slds-var-m-bottom_small" label={field.label} value={field.value}
+                            options={field.options} required={field.required} disabled={field.disabled}
+                            data-row-index={field.rowIndex} data-field-name={field.apiName}
+                            onchange={handleValueChange}>
+                        </lightning-combobox>
+                        <lightning-input lwc:else key={field.key}
+                            class="slds-var-m-bottom_small" type={field.dataType} label={field.label}
+                            value={field.value} required={field.required} disabled={field.disabled}
+                            data-row-index={field.rowIndex} data-field-name={field.apiName}
+                            onchange={handleValueChange}>
+                        </lightning-input>
+                    </template>
+                </section>
+            </template>
+            <lightning-button variant="brand" label="Create Records and Send to Chat"
+                disabled={saving} onclick={save}></lightning-button>
+            <lightning-spinner lwc:if={saving} alternative-text="Creating records" size="small"></lightning-spinner>
+            <details lwc:if={hasActivity} class="slds-var-m-top_large">
+                <summary>Bridge Activity ({activity.length})</summary>
+                <template for:each={activity} for:item="entry">
+                    <div key={entry.id} class="log-entry">
+                        <strong>{entry.label}</strong><pre>{entry.detail}</pre>
+                    </div>
+                </template>
+            </details>
+        </div>
+    </lightning-card>
+</template>

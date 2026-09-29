@@ -1,0 +1,14 @@
+.sf/
+.sfdx/
+.validation/
+.tmp/
+.checkpoints/
+node_modules/
+test-results/
+coverage/
+*.log
+npm-debug.log*
+.env
+.env.*
+!.env.example
+.testdata/

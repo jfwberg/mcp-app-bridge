@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata"><fullName>Max_Payload_Characters__c</fullName><defaultValue>32768</defaultValue><fieldManageability>SubscriberControlled</fieldManageability><label>Maximum Payload Characters</label><precision>5</precision><scale>0</scale><type>Number</type></CustomField>

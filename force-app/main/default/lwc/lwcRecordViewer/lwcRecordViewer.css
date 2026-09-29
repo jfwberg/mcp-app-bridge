@@ -1,0 +1,2 @@
+.log-entry { margin-top: var(--slds-g-spacing-3); }
+pre { background: var(--slds-g-color-surface-2); border-radius: var(--slds-g-radius-border-1); max-height: 12rem; overflow: auto; padding: var(--slds-g-spacing-2); white-space: pre-wrap; }
