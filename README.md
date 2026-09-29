@@ -40,7 +40,7 @@ Note That salesforce does expose the `/.well-known/openid-configuration` endpoin
 
 ## Package Info
 
-**Managed Package v67.0 - 0.1** `/packaging/installPackage.apexp?p0=04tP3000002Dt5ZIAS`
+**Managed Package v67.0 - 0.2** `/packaging/installPackage.apexp?p0=04tP3000002E2YfIAK`
 
 ## Start here
 

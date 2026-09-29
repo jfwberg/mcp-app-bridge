@@ -40,33 +40,8 @@ public with sharing class McpToolRegistry {
     private static Map<String,Object> render(McpLightningOutConfig config, Map<String,Object> args) {
         Map<String,Object> result = toolResult(config.displayName + ' is ready.', new Map<String,Object>{
             'configKey' => config.key,
-            'authenticated' => true,
             'componentInputs' => configuredInputs(config, args)
         });
-        // Mint the single-use URL as part of the opening tool call. MCP Apps
-        // expose result _meta to the widget without placing it in model context.
-        try {
-            McpLightningOutService.BootstrapConfig bootstrapConfig = McpLightningOutService.createBootstrapConfig(config);
-            result.put('_meta', new Map<String,Object>{
-                'mcpapp/bootstrap' => (Map<String,Object>)JSON.deserializeUntyped(JSON.serialize(bootstrapConfig))
-            });
-        } catch (McpProtocolException bootstrapFailure) {
-            McpDiagnostics.Entry diagnostic=new McpDiagnostics.Entry();diagnostic.stage='BOOTSTRAP_FAILED';diagnostic.operation='LIGHTNING_OUT_BOOTSTRAP';diagnostic.outcome='FAILED';
-            diagnostic.configKey=config.key;diagnostic.toolName=config.toolName;diagnostic.httpStatus=bootstrapFailure.httpStatus;
-            diagnostic.errorType=String.isBlank(bootstrapFailure.errorType)?'UI_SESSION_ERROR':bootstrapFailure.errorType;diagnostic.message=bootstrapFailure.getMessage();
-            McpDiagnostics.error(diagnostic);
-            // Return a normal UI-bearing tool result so the widget can explain
-            // authentication failures instead of disappearing behind a host 500.
-            Map<String,Object> structured = (Map<String,Object>)result.get('structuredContent');
-            structured.put('authenticated', false);
-            result.put('_meta', new Map<String,Object>{
-                'mcpapp/bootstrapError' => new Map<String,Object>{
-                    'type' => String.isBlank(bootstrapFailure.errorType) ? 'UI_SESSION_ERROR' : bootstrapFailure.errorType,
-                    'message' => bootstrapFailure.getMessage(),
-                    'retryable' => true
-                }
-            });
-        }
         return result;
     }
 
@@ -147,12 +122,28 @@ public with sharing class McpToolRegistry {
     private static Map<String,Object> bootstrap(Map<String,Object> args) {
         String configKey = (String)args.get('configKey');
         if (String.isBlank(configKey)) throw new McpProtocolException(-32602, 400, 'Lightning Out configuration key is required.');
-        McpLightningOutService.BootstrapConfig config = McpLightningOutService.createBootstrapConfig(McpLightningOutConfig.getByKey(configKey));
-        Map<String,Object> bootstrap = (Map<String,Object>)JSON.deserializeUntyped(JSON.serialize(config));
-        return new Map<String,Object>{
-            'content' => new List<Object>{new Map<String,Object>{'type' => 'text', 'text' => 'Lightning Out session created.'}},
-            'structuredContent' => new Map<String,Object>{'authenticated' => true}, '_meta' => new Map<String,Object>{'mcpapp/bootstrap' => bootstrap}, 'isError' => false
-        };
+        McpLightningOutConfig lightningConfig = McpLightningOutConfig.getByKey(configKey);
+        try {
+            McpLightningOutService.BootstrapConfig config = McpLightningOutService.createBootstrapConfig(lightningConfig);
+            Map<String,Object> bootstrap = (Map<String,Object>)JSON.deserializeUntyped(JSON.serialize(config));
+            return new Map<String,Object>{
+                'content' => new List<Object>{new Map<String,Object>{'type' => 'text', 'text' => 'Lightning Out session created.'}},
+                'structuredContent' => new Map<String,Object>{'authenticated' => true}, '_meta' => new Map<String,Object>{'mcpapp/bootstrap' => bootstrap}, 'isError' => false
+            };
+        } catch (McpProtocolException bootstrapFailure) {
+            McpDiagnostics.Entry diagnostic=new McpDiagnostics.Entry();diagnostic.stage='BOOTSTRAP_FAILED';diagnostic.operation='LIGHTNING_OUT_BOOTSTRAP';diagnostic.outcome='FAILED';
+            diagnostic.configKey=lightningConfig.key;diagnostic.toolName='bootstrap_lightning_out';diagnostic.httpStatus=bootstrapFailure.httpStatus;
+            diagnostic.errorType=String.isBlank(bootstrapFailure.errorType)?'UI_SESSION_ERROR':bootstrapFailure.errorType;diagnostic.message=bootstrapFailure.getMessage();
+            McpDiagnostics.error(diagnostic);
+            return new Map<String,Object>{
+                'content' => new List<Object>{new Map<String,Object>{'type' => 'text', 'text' => 'The Lightning Out session could not be created.'}},
+                'structuredContent' => new Map<String,Object>{'authenticated' => false},
+                '_meta' => new Map<String,Object>{'mcpapp/bootstrapError' => new Map<String,Object>{
+                    'type' => String.isBlank(bootstrapFailure.errorType) ? 'UI_SESSION_ERROR' : bootstrapFailure.errorType,
+                    'message' => bootstrapFailure.getMessage(), 'retryable' => true
+                }}, 'isError' => false
+            };
+        }
     }
     private static Map<String,Object> eventDefinition() {
         Map<String,Object> meta = new Map<String,Object>{'ui' => new Map<String,Object>{'visibility' => new List<String>{'app'}}};

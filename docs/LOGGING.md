@@ -46,9 +46,9 @@ Blank fields mean that the value is not meaningful or was unavailable for that s
 | `SINGLE_ACCESS_CALLOUT` | The `/services/oauth2/singleaccess` endpoint could not be reached. This stage is emitted only on failure. |
 | `SINGLE_ACCESS_RESPONSE` | Salesforce answered `/services/oauth2/singleaccess`. A successful entry proves the access token was accepted for one-time UI access. |
 | `FRONTDOOR_VALIDATED` | The returned frontdoor URI passed origin and shape validation. Only its fingerprint is retained. |
-| `BOOTSTRAP_FAILED` | The opening tool could not produce a usable Lightning Out bootstrap. The widget receives a safe `mcpapp/bootstrapError`. |
+| `BOOTSTRAP_FAILED` | The widget's mount-time bootstrap call could not produce a usable Lightning Out bootstrap. The widget receives a safe `mcpapp/bootstrapError`. |
 | `UI_INITIALIZED` | The shared HTML resource started and initialized its MCP App connection. |
-| `BOOTSTRAP_RECEIVED` | The widget received bootstrap metadata from the opening tool result or compatibility bootstrap call. |
+| `BOOTSTRAP_RECEIVED` | The widget received fresh bootstrap metadata from its mount-time bootstrap call. |
 | `LIGHTNING_LIBRARY_LOADED` | The Lightning Out 2.0 browser library loaded. |
 | `APPLICATION_ATTACHED` | The frontdoor URL and Lightning Out app ID were handed to Lightning Out. This does not alone prove that the nested frame completed authentication. |
 | `COMPONENT_ATTACHED` | Lightning Out attached the configured custom element. |

@@ -28,8 +28,8 @@ Validate each layer separately so a host rendering restriction is not mistaken f
 
 1. **Negotiation:** `initialize` or `server/discover` returns the requested supported protocol version in the expected framing.
 2. **Discovery:** the client proceeds to `tools/list` or consumes the tools returned by its discovery flow.
-3. **Invocation:** `tools/call` returns the expected structured content and `mcpapp/bootstrap` metadata.
-4. **Authentication:** the generated frontdoor URL establishes the Salesforce UI session.
+3. **Invocation:** `tools/call` returns durable structured content without a single-use frontdoor URL.
+4. **Authentication:** every widget mount calls the app-only bootstrap tool, whose newly generated frontdoor URL establishes the Salesforce UI session.
 5. **Widget resource:** the host loads the MCP App HTML resource.
 6. **Nested UI:** the host CSP permits the widget iframe to load the Salesforce iframe.
 7. **Interaction:** host-to-LWC and LWC-to-host events are delivered as configured.

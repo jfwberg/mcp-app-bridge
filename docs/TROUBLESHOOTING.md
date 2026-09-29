@@ -38,9 +38,9 @@ The MCP client may show only this response:
 }
 ```
 
-### Inspect the opening tool result
+### Inspect the widget bootstrap result
 
-Inspect the complete result from the UI-opening tool call, including its widget-only `_meta`. If it contains the following value, the bridge could not resolve a valid Lightning Out application ID:
+Inspect the complete result from the app-only `bootstrap_lightning_out` call made when the widget mounts, including its widget-only `_meta`. If it contains the following value, the bridge could not resolve a valid Lightning Out application ID:
 
 ```json
 {

@@ -3,7 +3,7 @@
     <label>Demo Record Viewer</label><protected>false</protected>
     <values><field>Enabled__c</field><value xsi:type="xsd:boolean" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">false</value></values>
     <values><field>Component_Name__c</field><value xsi:type="xsd:string" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">mcpapp-lwc-record-viewer</value></values>
-    <values><field>Resource_Uri__c</field><value xsi:type="xsd:string" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">ui://mcp-app-bridge/demo-record-viewer/v8/index.html</value></values>
+    <values><field>Resource_Uri__c</field><value xsi:type="xsd:string" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">ui://mcp-app-bridge/demo-record-viewer/v9/index.html</value></values>
     <values><field>Static_Resource_Name__c</field><value xsi:type="xsd:string" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">McpLightningOutHost</value></values>
     <values><field>Display_Name__c</field><value xsi:type="xsd:string" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">Demo Record Viewer</value></values>
     <values><field>Description__c</field><value xsi:type="xsd:string" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">Display selected Account or Contact records in a Salesforce data table.</value></values>

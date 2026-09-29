@@ -3,7 +3,7 @@
     <label>Demo Record Creator</label><protected>false</protected>
     <values><field>Enabled__c</field><value xsi:type="xsd:boolean" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">false</value></values>
     <values><field>Component_Name__c</field><value xsi:type="xsd:string" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">mcpapp-lwc-record-creator</value></values>
-    <values><field>Resource_Uri__c</field><value xsi:type="xsd:string" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">ui://mcp-app-bridge/demo-record-creator/v7/index.html</value></values>
+    <values><field>Resource_Uri__c</field><value xsi:type="xsd:string" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">ui://mcp-app-bridge/demo-record-creator/v8/index.html</value></values>
     <values><field>Static_Resource_Name__c</field><value xsi:type="xsd:string" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">McpLightningOutHost</value></values>
     <values><field>Display_Name__c</field><value xsi:type="xsd:string" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">Demo Record Creator</value></values>
     <values><field>Description__c</field><value xsi:type="xsd:string" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">Open an editable form to create up to three Account or Contact records, then send the results back to the conversation.</value></values>
