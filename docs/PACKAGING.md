@@ -7,7 +7,7 @@
 - Keep all org URLs, OAuth clients, secrets, tokens, and Lightning Out app IDs out of package source.
 - Keep the packaged core and demo configuration records disabled.
 - Confirm logging is disabled and the package includes the log object, tab, platform event, trigger, layout, fields, and permission-set access.
-- Confirm `2025-06-18`, `2025-11-25`, and `2026-07-28` endpoint tests pass.
+- Confirm `2024-11-05`, `2025-06-18`, `2025-11-25`, and `2026-07-28` endpoint tests pass.
 - Keep configuration custom metadata public and configurable fields subscriber-controlled.
 - Keep `MCP_Session__c` private.
 - Verify the `MCP App Bridge` permission set includes all bridge and demo Apex classes.

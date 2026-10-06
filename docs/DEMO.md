@@ -5,14 +5,14 @@ The packaged demo contains only two example LWCs:
 - `mcpapp/lwcRecordCreator`
 - `mcpapp/lwcRecordViewer`
 
-The configuration records are disabled by default because Lightning Out app IDs are org-specific.
+The Lightning Out configuration records are disabled by default because app IDs are org-specific. Their event mappings are enabled by default and become active when their parent configuration is enabled.
 
 ## Enable it
 
 1. Create or reuse a Lightning Out 2.0 app containing both demo LWCs.
 2. Set that app's 18-character ID on `demo_record_creator` and `demo_record_viewer` under **MCP App Bridge Lightning Out 2.0**.
 3. Enable both records.
-4. Confirm `demo_records_created` and `demo_records_viewed` event mappings are enabled.
+4. Confirm the pre-enabled `demo_records_created` and `demo_records_viewed` event mappings remain enabled.
 5. Reconnect the MCP client.
 
 ## Primary prompt

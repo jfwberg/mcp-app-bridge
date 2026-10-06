@@ -30,7 +30,7 @@ public with sharing class McpToolRegistry {
     }
     private static Map<String,Object> renderDefinition(McpLightningOutConfig config) {
         String description = String.isBlank(config.description) ? 'Open the configured Salesforce Lightning Out interface.' : config.description;
-        Map<String,Object> meta = new Map<String,Object>{'ui' => new Map<String,Object>{'resourceUri' => config.resourceUri}};
+        Map<String,Object> meta = uiResourceMetadata(config.resourceUri);
         return new Map<String,Object>{
             'name' => config.toolName, 'title' => 'Open ' + config.displayName, 'description' => description,
             'inputSchema' => parseInputSchema(config.inputSchemaJson),
@@ -85,12 +85,19 @@ public with sharing class McpToolRegistry {
         return new McpProtocolException(-32602, 400, 'Invalid component input: ' + key + ' ' + requirement + '.');
     }
     private static Map<String,Object> actionDefinition(McpLightningOutConfig config, McpEventMappingConfig mapping) {
-        Map<String,Object> meta = new Map<String,Object>{'ui' => new Map<String,Object>{'resourceUri' => config.resourceUri}};
+        Map<String,Object> meta = uiResourceMetadata(config.resourceUri);
         return new Map<String,Object>{
             'name' => mapping.toolName,
             'title' => String.isBlank(mapping.toolTitle) ? mapping.toolName : mapping.toolTitle,
             'description' => String.isBlank(mapping.toolDescription) ? 'Send a configured action to the Salesforce component.' : mapping.toolDescription,
             'inputSchema' => parseInputSchema(mapping.inputSchemaJson), '_meta' => meta, 'securitySchemes' => oauthSecuritySchemes()
+        };
+    }
+    /** Standard UI linkage plus the flat compatibility alias used by Microsoft samples. */
+    private static Map<String,Object> uiResourceMetadata(String resourceUri) {
+        return new Map<String,Object>{
+            'ui' => new Map<String,Object>{'resourceUri' => resourceUri, 'visibility' => new List<String>{'model','app'}},
+            'ui/resourceUri' => resourceUri
         };
     }
     private static Map<String,Object> dispatchAction(McpLightningOutConfig config, McpEventMappingConfig mapping, Map<String,Object> args) {

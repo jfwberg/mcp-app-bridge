@@ -4,7 +4,7 @@ Start by enabling [diagnostic logging](LOGGING.md), reproduce the problem once, 
 
 ## MCP negotiation stops before tools/list
 
-For MCP `2026-07-28`, a client normally sends `server/discover` and then `tools/list`. For MCP `2025-06-18` or `2025-11-25`, it sends `initialize`, `notifications/initialized`, and then `tools/list`.
+For MCP `2026-07-28`, a client normally sends `server/discover` and then `tools/list`. For MCP `2024-11-05`, `2025-06-18`, or `2025-11-25`, it sends `initialize`, `notifications/initialized`, and then `tools/list`.
 
 If the bridge logs a successful discovery or initialization but receives no subsequent request, the server cannot progress the connection: the client stopped locally. Capture the successful response, response headers, client error, and the absence of a later `MCP_REQUEST` for the client vendor. A `Correlation ID` such as `openai-mcp-discover` is the caller's JSON-RPC request ID and is expected.
 

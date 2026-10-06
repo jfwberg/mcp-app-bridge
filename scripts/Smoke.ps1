@@ -125,6 +125,7 @@ function Test-OpenAiLegacyVersion {
 }
 
 try {
+    Test-LegacyVersion '2024-11-05'
     Test-LegacyVersion '2025-06-18'
     Test-LegacyVersion '2025-11-25'
     Test-OpenAiLegacyVersion

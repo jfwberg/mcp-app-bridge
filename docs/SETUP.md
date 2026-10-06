@@ -1,5 +1,7 @@
 # Installation and org setup
 
+For Microsoft Teams, use the [Microsoft appPackage setup](../appPackage/README.md). At this stage, the tested Copilot Studio agent/connector route exposes tools but does not render MCP Apps UI; a packaged declarative-agent integration is required. Teams LWC rendering was confirmed on 6 October 2026. Configure both OAuth popup headers and Salesforce trusted iframe domains as described in [client compatibility](COMPATIBILITY.md).
+
 ## 1. Assign access
 
 Assign the packaged **MCP App Bridge** permission set to every integration user. Grant those users the object and field permissions required by the LWCs they launch; the bridge permission set does not grant access to arbitrary business data.
@@ -14,7 +16,7 @@ Edit the `Default` record under **MCP App Bridge Core Configuration**.
 | ECA Consumer Key | Consumer key from the External Client App |
 | ECA Certificate Name | Developer name from Certificate and Key Management |
 | Required Scopes | `api web refresh_token` |
-| Protocol Version | `2025-11-25` (the preferred legacy handshake revision; `2025-06-18` and `2026-07-28` are also supported automatically) |
+| Protocol Version | `2025-11-25` (the preferred legacy handshake revision; `2024-11-05`, `2025-06-18`, and `2026-07-28` are also supported automatically) |
 | Logging Enabled | Disabled by default. Enable temporarily to create sanitized `MCP_Bridge_Log__c` diagnostic records. |
 | MCP Session Timeout Minutes | `30` |
 | Allowed Origins | Comma-separated MCP host origins |
@@ -71,6 +73,6 @@ https://{MY_DOMAIN}/services/apexrest/mcpapp/mcp
 
 Reconnect the client whenever tool configuration or a versioned `ui://` resource URI changes.
 
-The same endpoint supports both MCP protocol eras. Legacy clients negotiate either `2025-06-18` or `2025-11-25` through `initialize`; the bridge does not assign the optional `MCP-Session-Id`, and subsequent requests identify their revision with `MCP-Protocol-Version`. Modern clients call `server/discover`, select `2026-07-28`, and send sessionless requests containing matching protocol metadata and standard MCP routing headers. Do not send a legacy session ID on behalf of a modern client; the server deliberately keeps the two lifecycles separate.
+The same endpoint supports both MCP protocol eras. Legacy clients negotiate `2024-11-05`, `2025-06-18`, or `2025-11-25` through `initialize`; the bridge does not assign the optional `MCP-Session-Id`, and subsequent requests identify their revision with `MCP-Protocol-Version` (optional for `2024-11-05`; headerless stateless requests use that revision). Modern clients call `server/discover`, select `2026-07-28`, and send sessionless requests containing matching protocol metadata and standard MCP routing headers. Do not send a legacy session ID on behalf of a modern client; the server deliberately keeps the two lifecycles separate.
 
 If a widget cannot create its Salesforce UI session, see [Troubleshooting](TROUBLESHOOTING.md) for the bootstrap error categories and configuration checks.

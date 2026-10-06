@@ -1,6 +1,57 @@
 /** Behavioral tests for the stateful MCP HTTP endpoint. */
 @IsTest
 private class McpRestEndpointTest {
+    @IsTest static void shouldPublishMatchingUiResourceAliases(){
+        String sessionId=initialize('2024-11-05');ready(sessionId,'2024-11-05');
+        McpEventMappingConfig mapping=new McpEventMappingConfig();mapping.key='refresh';mapping.configKey='admin_friend';mapping.direction='HOST_TO_LWC';mapping.eventName='refresh_component';mapping.hostAction='DISPATCH_EVENT';mapping.toolName='refresh_configured_component';mapping.maxPayloadCharacters=4096;McpEventMappingConfig.testMappings.add(mapping);
+        setRequest('POST',JSON.serialize(new Map<String,Object>{'jsonrpc'=>'2.0','id'=>2,'method'=>'tools/list'}));useSession(sessionId,'2024-11-05');McpRestEndpoint.doPost();
+        Assert.areEqual(200,RestContext.response.statusCode,'2024 discovery should succeed');
+        Map<String,Object> result=(Map<String,Object>)((Map<String,Object>)JSON.deserializeUntyped(responseJson())).get('result');
+        Integer linkedTools=0;
+        for(Object item:(List<Object>)result.get('tools')) {
+            Map<String,Object> tool=(Map<String,Object>)item;Map<String,Object> meta=(Map<String,Object>)tool.get('_meta');Map<String,Object> ui=(Map<String,Object>)meta.get('ui');
+            if(ui.containsKey('resourceUri')) {
+                linkedTools++;
+                Assert.areEqual('ui://mcp-app-bridge/admin-friend/v3/index.html',ui.get('resourceUri'),'UI tools should link the configured resource');
+                Assert.areEqual(ui.get('resourceUri'),meta.get('ui/resourceUri'),'Flat and nested resource URIs must agree on the wire');
+                Assert.areEqual('["model","app"]',JSON.serialize(ui.get('visibility')),'UI-linked tools must explicitly allow model and app calls');
+            } else Assert.isFalse(meta.containsKey('ui/resourceUri'),'App-only helper tools must not gain a UI resource');
+        }
+        Assert.areEqual(2,linkedTools,'Opening and inbound action tools must both publish the alias');
+    }
+    @IsTest static void shouldSupportNovember2024WithAndWithoutHeaders(){
+        String version='2024-11-05';String sessionId=initialize(version);ready(sessionId,version);
+        setRequest('POST',JSON.serialize(new Map<String,Object>{'jsonrpc'=>'2.0','id'=>'old-tools','method'=>'tools/list'}));
+        RestContext.request.addHeader('MCP-Session-Id',sessionId);McpRestEndpoint.doPost();
+        Assert.areEqual(200,RestContext.response.statusCode,'2024 sessions must work without the later version header');
+        Map<String,Object> result=(Map<String,Object>)((Map<String,Object>)JSON.deserializeUntyped(responseJson())).get('result');
+        for(Object item:(List<Object>)result.get('tools')) Assert.isFalse(((Map<String,Object>)item).containsKey('title'),'2024 tools must omit later titles');
+        setRequest('POST',JSON.serialize(new Map<String,Object>{'jsonrpc'=>'2.0','id'=>'old-call','method'=>'tools/call','params'=>new Map<String,Object>{'name'=>'open_admin_friend'}}));
+        McpRestEndpoint.doPost();
+        Assert.areEqual(200,RestContext.response.statusCode,'Headerless stateless 2024 calls must work');
+        result=(Map<String,Object>)((Map<String,Object>)JSON.deserializeUntyped(responseJson())).get('result');
+        Assert.isFalse(result.containsKey('structuredContent'),'2024 must use text content for structured data');
+        List<Object> content=(List<Object>)result.get('content');
+        Map<String,Object> data=(Map<String,Object>)JSON.deserializeUntyped((String)((Map<String,Object>)content[1]).get('text'));
+        Assert.areEqual('admin_friend',data.get('configKey'),'Text fallback must preserve tool data');
+        setRequest('POST',JSON.serialize(new Map<String,Object>{'jsonrpc'=>'2.0','id'=>'wrong-old-version','method'=>'tools/list'}));useSession(sessionId,'2025-06-18');McpRestEndpoint.doPost();
+        Assert.areEqual(400,RestContext.response.statusCode,'Explicit session version mismatches must still fail');
+    }
+    @IsTest static void shouldInitializeNovember2024Stateless(){
+        McpLifecycleService.testStatefulSessions=false;
+        setRequest('POST',JSON.serialize(new Map<String,Object>{'jsonrpc'=>'2.0','id'=>1,'method'=>'initialize','params'=>new Map<String,Object>{'protocolVersion'=>'2024-11-05'}}));McpRestEndpoint.doPost();
+        Assert.areEqual(200,RestContext.response.statusCode,'2024 initialize should succeed');
+        Assert.isNull(RestContext.response.headers.get('MCP-Session-Id'),'Default initialize must stay stateless');
+        Map<String,Object> result=(Map<String,Object>)((Map<String,Object>)JSON.deserializeUntyped(responseJson())).get('result');
+        Assert.areEqual('2024-11-05',result.get('protocolVersion'),'Requested revision must be negotiated');
+        Map<String,Object> capabilities=(Map<String,Object>)result.get('capabilities');
+        Assert.isTrue(capabilities.containsKey('extensions'),'MCP Apps uses extensions even with the 2024 core revision');
+        Assert.isTrue(JSON.serialize(capabilities.get('extensions')).contains('io.modelcontextprotocol/ui'),'2024 must advertise MCP Apps support');
+        setRequest('POST',JSON.serialize(new Map<String,Object>{'jsonrpc'=>'2.0','method'=>'notifications/initialized'}));McpRestEndpoint.doPost();
+        Assert.areEqual(202,RestContext.response.statusCode,'Headerless initialized notification must succeed');
+        setRequest('POST',JSON.serialize(new Map<String,Object>{'jsonrpc'=>'2.0','id'=>2,'method'=>'ping'}));RestContext.request.addHeader('MCP-Protocol-Version','unsupported');McpRestEndpoint.doPost();
+        Assert.areEqual(400,RestContext.response.statusCode,'Explicit unsupported versions must remain rejected');
+    }
     private static void setRequest(String method,String body){ RestRequest request=new RestRequest(); request.requestURI='/services/apexrest/mcp'; request.httpMethod=method; request.addHeader('Content-Type','application/json'); request.addHeader('Accept','application/json, text/event-stream'); if(body!=null)request.requestBody=Blob.valueOf(body); RestContext.request=request; RestContext.response=new RestResponse(); }
     private static String responseJson(){String body=RestContext.response.responseBody.toString();if(body.startsWith('event: message\ndata: '))return body.substring('event: message\ndata: '.length()).trim();return body;}
     private static String initialize(){ return initialize('2025-11-25'); }

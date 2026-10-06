@@ -1,0 +1,327 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/copilot/plugin/v2.4/schema.json",
+  "schema_version": "v2.4",
+  "name_for_human": "MCP App Bridge",
+  "description_for_human": "Create and view Salesforce records and explore administration metadata.",
+  "namespace": "MCPAppBridge",
+  "functions": [
+    {
+      "name": "open_demo_record_creator",
+      "description": "Open an editable form to create up to three Account or Contact records, then send the results back to the conversation."
+    },
+    {
+      "name": "open_demo_record_viewer",
+      "description": "Display selected Account or Contact records in a Salesforce data table."
+    },
+    {
+      "name": "open_mcp_admin_friend",
+      "description": "Read-only Salesforce administration explorer with optional initial object selection and JSON action events."
+    },
+    {
+      "name": "bootstrap_lightning_out",
+      "description": "Create a fresh, single-use Salesforce Lightning Out session for the mounted app."
+    },
+    {
+      "name": "bridge_event",
+      "description": "Validate and route an event from a configured Lightning Out component."
+    },
+    {
+      "name": "log_bridge_diagnostic",
+      "description": "Record a sanitized lifecycle milestone from the mounted MCP App."
+    }
+  ],
+  "runtimes": [
+    {
+      "type": "RemoteMCPServer",
+      "spec": {
+        "url": "https://ezform-dev-ed.my.salesforce.com/services/apexrest/mcpapp/mcp",
+        "mcp_tool_description": {
+          "tools": [
+            {
+              "name": "open_demo_record_creator",
+              "title": "Open Demo Record Creator",
+              "description": "Open an editable form to create up to three Account or Contact records, then send the results back to the conversation.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "objectApiName": {
+                    "type": "string",
+                    "enum": [
+                      "Account",
+                      "Contact"
+                    ],
+                    "description": "Type of Salesforce record to create."
+                  },
+                  "recordCount": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 3
+                  },
+                  "fieldValues": {
+                    "type": "object",
+                    "description": "Initial field values applied to each row."
+                  },
+                  "fieldNames": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Optional allowed fields to show."
+                  },
+                  "allowEditing": {
+                    "type": "boolean",
+                    "default": true
+                  },
+                  "heading": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "objectApiName",
+                  "recordCount"
+                ],
+                "additionalProperties": false
+              },
+              "_meta": {
+                "ui": {
+                  "resourceUri": "ui://mcp-app-bridge/demo-record-creator/v8/index.html",
+                  "visibility": [
+                    "model",
+                    "app"
+                  ]
+                },
+                "ui/resourceUri": "ui://mcp-app-bridge/demo-record-creator/v8/index.html"
+              },
+              "securitySchemes": [
+                {
+                  "type": "oauth2",
+                  "scopes": [
+                    "api"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "open_demo_record_viewer",
+              "title": "Open Demo Record Viewer",
+              "description": "Display selected Account or Contact records in a Salesforce data table.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "objectApiName": {
+                    "type": "string",
+                    "enum": [
+                      "Account",
+                      "Contact"
+                    ]
+                  },
+                  "recordIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 1,
+                    "maxItems": 3
+                  },
+                  "fieldNames": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "objectApiName",
+                  "recordIds"
+                ],
+                "additionalProperties": false
+              },
+              "_meta": {
+                "ui": {
+                  "resourceUri": "ui://mcp-app-bridge/demo-record-viewer/v9/index.html",
+                  "visibility": [
+                    "model",
+                    "app"
+                  ]
+                },
+                "ui/resourceUri": "ui://mcp-app-bridge/demo-record-viewer/v9/index.html"
+              },
+              "securitySchemes": [
+                {
+                  "type": "oauth2",
+                  "scopes": [
+                    "api"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "open_mcp_admin_friend",
+              "title": "Open MCP Admin Friend",
+              "description": "Read-only Salesforce administration explorer with optional initial object selection and JSON action events.",
+              "inputSchema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "objectApiName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Optional API name of an accessible Salesforce object to select when the widget opens."
+                  }
+                }
+              },
+              "_meta": {
+                "ui": {
+                  "resourceUri": "ui://xdemo/mcp-admin-friend/v1/index.html",
+                  "visibility": [
+                    "model",
+                    "app"
+                  ]
+                },
+                "ui/resourceUri": "ui://xdemo/mcp-admin-friend/v1/index.html"
+              },
+              "securitySchemes": [
+                {
+                  "type": "oauth2",
+                  "scopes": [
+                    "api"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "bootstrap_lightning_out",
+              "title": "Create Lightning Out session",
+              "description": "Create a fresh, single-use Salesforce Lightning Out session for the mounted app.",
+              "inputSchema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "configKey": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "configKey"
+                ]
+              },
+              "_meta": {
+                "ui": {
+                  "visibility": [
+                    "app"
+                  ]
+                }
+              },
+              "securitySchemes": [
+                {
+                  "type": "oauth2",
+                  "scopes": [
+                    "api"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "bridge_event",
+              "title": "Route component event",
+              "description": "Validate and route an event from a configured Lightning Out component.",
+              "inputSchema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "configKey": {
+                    "type": "string"
+                  },
+                  "mappingKey": {
+                    "type": "string"
+                  },
+                  "payload": {}
+                },
+                "required": [
+                  "configKey",
+                  "mappingKey",
+                  "payload"
+                ]
+              },
+              "_meta": {
+                "ui": {
+                  "visibility": [
+                    "app"
+                  ]
+                }
+              },
+              "securitySchemes": [
+                {
+                  "type": "oauth2",
+                  "scopes": [
+                    "api"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "log_bridge_diagnostic",
+              "title": "Record bridge diagnostic",
+              "description": "Record a sanitized lifecycle milestone from the mounted MCP App.",
+              "inputSchema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "configKey": {
+                    "type": "string"
+                  },
+                  "stage": {
+                    "type": "string"
+                  },
+                  "outcome": {
+                    "type": "string",
+                    "enum": [
+                      "SUCCEEDED",
+                      "FAILED"
+                    ]
+                  },
+                  "message": {
+                    "type": "string",
+                    "maxLength": 255
+                  }
+                },
+                "required": [
+                  "configKey",
+                  "stage",
+                  "outcome"
+                ]
+              },
+              "_meta": {
+                "ui": {
+                  "visibility": [
+                    "app"
+                  ]
+                }
+              },
+              "securitySchemes": [
+                {
+                  "type": "oauth2",
+                  "scopes": [
+                    "api"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "run_for_functions": [
+        "open_demo_record_creator",
+        "open_demo_record_viewer",
+        "open_mcp_admin_friend",
+        "bootstrap_lightning_out",
+        "bridge_event",
+        "log_bridge_diagnostic"
+      ],
+      "auth": {
+        "type": "OAuthPluginVault",
+        "reference_id": "YTVmNmIwNzktZDIzOS00ZWM3LWExNTYtMGE0MDk2MzEyMjUwIyMzYzM1YjE5Ny02MTE0LTQxOTUtODkzZC1jY2RkZTNiNDAwNDA="
+      }
+    }
+  ]
+}

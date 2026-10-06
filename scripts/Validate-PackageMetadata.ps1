@@ -70,8 +70,8 @@ foreach ($record in $demoRecords) {
 $eventRecords = Get-ChildItem -LiteralPath (Join-Path $metadataRoot 'customMetadata') -Filter 'MCP_App_Bridge_Event_Mapping.*.md-meta.xml'
 foreach ($record in $eventRecords) {
     [xml]$xml = Get-Content -Raw -LiteralPath $record.FullName
-    if ((Get-CustomMetadataValue $xml 'Enabled__c') -ne 'false') {
-        throw "Packaged event-mapping sample must remain disabled: $($record.Name)."
+    if ((Get-CustomMetadataValue $xml 'Enabled__c') -ne 'true') {
+        throw "Packaged event-mapping sample must remain enabled: $($record.Name)."
     }
 }
 

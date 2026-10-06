@@ -4,7 +4,8 @@ Salesforce MCP App Bridge is a managed-package MCP server that turns configured 
 
 Version 0.1 supports both protocol eras on one Apex REST endpoint:
 
-- MCP `2025-06-18` and `2025-11-25`: stateless-compatible `initialize` flows, with backward-compatible handling of existing session-bearing requests.
+- MCP `2024-11-05`, `2025-06-18`, and `2025-11-25`: stateless-compatible `initialize` flows, with backward-compatible handling of existing session-bearing requests.
+- Microsoft (MSFT) clients have been observed using `2024-11-05`; this revision is supported over the bridge's existing HTTP response flow. Salesforce LWC rendering in Teams was confirmed on 6 October 2026 using an [appPackage](appPackage/README.md). At this stage, exposing the MCP server through a Copilot Studio agent does not render MCP Apps UI; use the packaged declarative-agent integration. See [client compatibility](docs/COMPATIBILITY.md).
 - MCP `2026-07-28`: sessionless `server/discover` flow with per-request metadata and standard routing headers.
 
 ## What it provides

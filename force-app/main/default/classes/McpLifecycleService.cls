@@ -1,6 +1,7 @@
 /** Implements MCP stateful lifecycle and validation. */
 public with sharing class McpLifecycleService {
     @TestVisible private static final Set<String> SUPPORTED_PROTOCOL_VERSIONS = new Set<String>{
+        '2024-11-05',
         '2025-06-18',
         '2025-11-25'
     };
@@ -36,12 +37,15 @@ public with sharing class McpLifecycleService {
         if (session==null || session.expiresAt<=System.now() || session.lifecycleState=='TERMINATED') throw new McpProtocolException(-32600,404,'Session not found.');
         if (session.userId!=UserInfo.getUserId() || session.organizationId!=UserInfo.getOrganizationId()) throw new McpProtocolException(-32600,403,'Session access denied.');
         String version=getHeaderIgnoreCase(request, 'MCP-Protocol-Version');
+        if (String.isBlank(version) && session.protocolVersion=='2024-11-05') version=session.protocolVersion;
         if (version!=session.protocolVersion) throw new McpProtocolException(-32600,400,'MCP-Protocol-Version does not match the session.');
         if (requireReady && session.lifecycleState!='READY') throw new McpProtocolException(-32600,400,'Session initialization is incomplete.');
         return session;
     }
     public String requireStatelessProtocolVersion(RestRequest request) {
         String version=getHeaderIgnoreCase(request, 'MCP-Protocol-Version');
+        // November 2024 predates the protocol-version HTTP header.
+        if (String.isBlank(version)) version='2024-11-05';
         if (!SUPPORTED_PROTOCOL_VERSIONS.contains(version)) {
             throw new McpProtocolException(-32600,400,'A supported MCP-Protocol-Version is required.');
         }

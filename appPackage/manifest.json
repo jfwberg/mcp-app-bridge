@@ -1,0 +1,44 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.24/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.24",
+  "version": "1.0.3",
+  "id": "6fd0c816-4c64-4828-8a4e-5a76a3d8d91a",
+  "developer": {
+    "name": "EZ Form",
+    "websiteUrl": "https://ezform-dev-ed.my.salesforce.com",
+    "privacyUrl": "https://ezform-dev-ed.my.salesforce.com",
+    "termsOfUseUrl": "https://ezform-dev-ed.my.salesforce.com"
+  },
+  "name": {
+    "short": "MCP App Bridge",
+    "full": "MCP App Bridge for EZ Form"
+  },
+  "description": {
+    "short": "Create and view records and explore Salesforce metadata.",
+    "full": "Three authenticated Salesforce interfaces: Record Creator, Record Viewer, and MCP Admin Friend, using MCP Apps and Lightning Out."
+  },
+  "icons": {
+    "outline": "outline.png",
+    "color": "color.png"
+  },
+  "accentColor": "#0176D3",
+  "composeExtensions": [],
+  "permissions": [
+    "identity",
+    "messageTeamMembers"
+  ],
+  "validDomains": [
+    "oauth-proxy.jsts.dev",
+    "ezform-dev-ed.my.salesforce.com",
+    "ezform-dev-ed.lightning.force.com",
+    "ezform-dev-ed.file.force.com"
+  ],
+  "copilotAgents": {
+    "declarativeAgents": [
+      {
+        "id": "mcpAppBridge",
+        "file": "declarativeAgent.json"
+      }
+    ]
+  }
+}
