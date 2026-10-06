@@ -2,7 +2,7 @@
 
 Salesforce MCP App Bridge is a managed-package MCP server that turns configured Lightning Web Components into authenticated MCP Apps and generated tools without adding component-specific code to the bridge.
 
-Version 0.1 supports both protocol eras on one Apex REST endpoint:
+The current bridge supports four protocol revisions on one Apex REST endpoint:
 
 - MCP `2024-11-05`, `2025-06-18`, and `2025-11-25`: stateless-compatible `initialize` flows, with backward-compatible handling of existing session-bearing requests.
 - Microsoft (MSFT) clients have been observed using `2024-11-05`; this revision is supported over the bridge's existing HTTP response flow. Salesforce LWC rendering in Teams was confirmed on 6 October 2026 using an [appPackage](appPackage/README.md). At this stage, exposing the MCP server through a Copilot Studio agent does not render MCP Apps UI; use the packaged declarative-agent integration. See [client compatibility](docs/COMPATIBILITY.md).
@@ -36,12 +36,12 @@ Salesforce token
 https://{MY_DOMAIN}/services/oauth2/token
 ```
 
-Apex REST cannot own a domain-root `/.well-known/*` route. The Salesforce My Domain does not currentyl expose the `./well-known/oauth-authorization-server` endpoint. Clients that soley rely on this resource will require an authentication proxy solution until Salesforce adds the `./well-known` endpoint.
-Note That salesforce does expose the `/.well-known/openid-configuration` endpoint that MCP clients should fall back on, but this does not always happen in practice.
+Apex REST cannot own a domain-root `/.well-known/*` route. The Salesforce My Domain does not currently expose the `/.well-known/oauth-authorization-server` endpoint. Clients that solely rely on this resource will require an authentication proxy solution until Salesforce adds the `/.well-known` endpoint.
+Salesforce does expose the `/.well-known/openid-configuration` endpoint which some MCP clients can use for discovery, but this does not always happen in practice.
 
 ## Package Info
 
-**Managed Package v67.0 - 0.2** `/packaging/installPackage.apexp?p0=04tP3000002E2YfIAK`
+**Managed Package v67.0 - 0.3** `/packaging/installPackage.apexp?p0=04tP3000002EtujIAC`
 
 ## Start here
 

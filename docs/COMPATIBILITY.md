@@ -9,9 +9,11 @@ This page records observed interoperability results for MCP App Bridge. It disti
 | Client/host | Observed MCP flow | Response profile | Tool and authentication status | Embedded UI status |
 | --- | --- | --- | --- | --- |
 | ChatGPT (`openai-mcp/1.0.0`) | `2026-07-28` using `server/discover` | Sessionless completed SSE `message` responses | End-to-end verified: discovery, tool calls, bootstrap, frontdoor authentication, and follow-up actions | Working end to end |
-| Slack (`Slack-MCP-Client/1.0`) | `2025-06-18` using `initialize` | Stateless-compatible completed SSE `message` responses | Initialization, tool discovery, tool invocation, and frontdoor generation verified | Working End to End. Note: By default frame are blocked by the Slack host CSP `frame-src 'none'`; You need to contact support to change this setting |
-| Claude | Legacy MCP initialize/tool flow | Legacy-compatible transport | Discovery, tool invocation, and valid frontdoor authentication verified. Note: OAuth requires a token proxy due to strict OAuth 2.1 implementation | The observed host CSP does not permit the nested Salesforce iframe; this is not an MCP App Bridge failure, No solution as of yet |
-| Microsoft Copilot Studio (`MicrosoftCopilotStudio-AgenticLoop/1.0`) | Observed `2024-11-05` using `initialize`; headerless `tools/call` | Legacy completed POST/SSE response profile | Admin Friend invocation returned HTTP 200, `isError: false`, and component input data | User reports no visible UI; resource fetch and widget bootstrap not yet confirmed |
+| Slack (`Slack-MCP-Client/1.0`) | `2025-06-18` using `initialize` | Stateless-compatible completed SSE `message` responses | Initialization, tool discovery, tool invocation, and frontdoor generation verified | Working in the configured environment; a previously observed `frame-src 'none'` required a host-side policy change through support |
+| Claude | Legacy MCP initialize/tool flow | Legacy-compatible transport | Discovery, tool invocation, and valid frontdoor authentication verified. Note: OAuth requires a token proxy due to strict OAuth 2.1 implementation | The observed host CSP does not permit the nested Salesforce iframe; this is not an MCP App Bridge failure, No workaround verified in this project |
+| Microsoft Copilot Studio (`MicrosoftCopilotStudio-AgenticLoop/1.0`) | Observed `2024-11-05` using `initialize`; headerless `tools/call` | Legacy completed POST/SSE response profile | Admin Friend invocation returned HTTP 200, `isError: false`, and component input data | No UI in the tested agent/connector route; no subsequent resources/read observed |
+
+| Microsoft Teams (packaged declarative agent) | RemoteMCPServer plugin with pinned tools; runtime protocol revision not captured separately | Packaged MCP Apps integration | OAuth and widget bootstrap completed in the tested setup | Salesforce LWC rendering confirmed on 6 October 2026; individual tool/action acceptance tests not all recorded |
 
 These results describe the tested host versions and can change when a host updates its MCP implementation or CSP.
 
@@ -30,9 +32,7 @@ On 5 October 2026, the full project was deployed to the `mcpappbridge` scratch o
 
 A subsequent user-supplied Copilot Studio proxy trace confirmed a successful `open_mcp_admin_friend` call with `objectApiName: Contact` and the 2024 JSON text fallback. That response alone does not prove UI rendering: inspect the preceding `tools/list` entry for `_meta.ui.resourceUri`, then look for `resources/read` of that URI and `bootstrap_lightning_out`. If no resource read occurs, investigate host MCP Apps support and metadata preservation through the connector/proxy. If a resource is fetched, inspect widget initialization and browser CSP errors. The proxy's `X-Frame-Options: SAMEORIGIN` on the tool-call SSE response does not establish that the widget iframe was blocked. Microsoft [Copilot Studio resource documentation](https://learn.microsoft.com/en-us/microsoft-copilot-studio/mcp-add-components-to-agent) and [Cowork MCP Apps documentation](https://learn.microsoft.com/en-us/microsoft-365/copilot/cowork/mcp-apps-support) describe different client flows; do not assume identical UI support across Microsoft hosts.
 
-## Supported transport profiles
-
-### Microsoft sample references
+## Microsoft sample references
 
 Reviewed Microsoft's [interactive UI samples](https://github.com/microsoft/mcp-interactiveUI-samples/tree/8c2cb6eed8d916dd4d8af355c55133be98da95fd) on 5 October 2026. These examples provide a declarative-agent integration reference, not proof that the observed Copilot Studio connector supports the same renderer.
 
@@ -40,7 +40,9 @@ Reviewed Microsoft's [interactive UI samples](https://github.com/microsoft/mcp-i
 - The repository's [capability table](https://github.com/microsoft/mcp-interactiveUI-samples/blob/8c2cb6eed8d916dd4d8af355c55133be98da95fd/M365-Agents-Toolkit-Instructions.md) marks `frameDomains` supported. This conflicts with the Microsoft Learn Copilot table reviewed during diagnosis; verify the effective CSP in the target Teams renderer rather than treating either table as an end-to-end result for Salesforce.
 - The [Employee Training plugin manifest](https://github.com/microsoft/mcp-interactiveUI-samples/blob/8c2cb6eed8d916dd4d8af355c55133be98da95fd/mcp-apps/employee-training/node/appPackage/ai-plugin.json) registers a `RemoteMCPServer` runtime and includes a static `x-mcp_tool_description` with both `_meta.ui.resourceUri` and the compatibility alias `_meta["ui/resourceUri"]`. The bridge now emits both forms with the same URI for opening and inbound action tools, with explicit `_meta.ui.visibility: ["model", "app"]`. Bootstrap, event, and diagnostic helper tools retain app-only visibility. This is a compatibility measure matching the sample, not evidence that the standard nested metadata is invalid or that the observed host will render a widget.
 - Its app manifest registers `copilotAgents.declarativeAgents`, and the README instructs makers to sideload the package into Teams. This differs from adding an MCP tool through a Copilot Studio Power Platform connector.
-- The [Salesforce sample](https://github.com/microsoft/mcp-interactiveUI-samples/blob/8c2cb6eed8d916dd4d8af355c55133be98da95fd/mcp-apps/salesforce-crm/python/sf_crm_mcp/salesforce_server.py) renders its own React CRM UI backed by Salesforce API tools; it is not a Lightning Out iframe reference. Its handlers use structured output, whereas the bridge's 2024 profile supplies a JSON text fallback. That difference matters for widget data delivery after rendering starts, but does not establish why the host currently sends no resource read.
+- The [Salesforce sample](https://github.com/microsoft/mcp-interactiveUI-samples/blob/8c2cb6eed8d916dd4d8af355c55133be98da95fd/mcp-apps/salesforce-crm/python/sf_crm_mcp/salesforce_server.py) renders its own React CRM UI backed by Salesforce API tools; it is not a Lightning Out iframe reference. Its handlers use structured output, whereas the bridge's 2024 profile supplies a JSON text fallback. That difference matters for widget data delivery after rendering starts, but did not explain the missing resource read in the earlier Copilot Studio connector test.
+
+## Supported transport profiles
 
 - **OpenAI modern:** `2026-07-28`, sessionless requests, with each JSON-RPC result returned as one completed SSE `message` event.
 - **Legacy clients:** `2024-11-05`, `2025-06-18`, or `2025-11-25`, stateless-compatible requests, with completed SSE `message` responses. Existing requests carrying a valid bridge session ID remain compatible.
@@ -55,9 +57,9 @@ Validate each layer separately so a host rendering restriction is not mistaken f
 
 1. **Negotiation:** `initialize` or `server/discover` returns the requested supported protocol version in the expected framing.
 2. **Discovery:** the client proceeds to `tools/list` or consumes the tools returned by its discovery flow.
-3. **Invocation:** `tools/call` returns durable structured content without a single-use frontdoor URL.
-4. **Authentication:** every widget mount calls the app-only bootstrap tool, whose newly generated frontdoor URL establishes the Salesforce UI session.
-5. **Widget resource:** the host loads the MCP App HTML resource.
+3. **Invocation:** `tools/call` returns component data without a single-use frontdoor URL (structuredContent or the 2024 JSON text fallback).
+4. **Widget resource:** the host loads the MCP App HTML resource through resources/read.
+5. **Authentication:** every widget mount calls the app-only bootstrap tool, whose newly generated frontdoor URL establishes the Salesforce UI session.
 6. **Nested UI:** the host CSP permits the widget iframe to load the Salesforce iframe.
 7. **Interaction:** host-to-LWC and LWC-to-host events are delivered as configured.
 
@@ -73,6 +75,6 @@ For Microsoft 365/Copilot or another new client, capture the following without i
 - whether the body is JSON or SSE, including SSE event names but not credentials;
 - the next request made after negotiation, or confirmation that the client stopped;
 - MCP Bridge Log stages for discovery, invocation, frontdoor generation, and component events;
-- browser console CSP errors and the effective `frame-src` directive.
+- browser console CSP errors, the effective `frame-src` and `frame-ancestors` directives, and the ancestor origin chain.
 
 If negotiation succeeds but no discovery request follows, compare the response framing with the profiles above. If tool invocation and frontdoor generation succeed but no UI appears, use the iframe failure table in [Troubleshooting](TROUBLESHOOTING.md#salesforce-frame-is-blocked-by-the-mcp-client).

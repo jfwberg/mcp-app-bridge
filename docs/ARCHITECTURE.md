@@ -44,6 +44,6 @@ The same ChatGPT user agent receives completed SSE `message` events for modern `
 
 ## Configuration types
 
-- **MCP App Bridge Core Configuration**: ECA credentials, preferred legacy protocol revision, scopes, origins, and session timeout. Endpoint and OAuth discovery URLs are derived from the org's My Domain. Both supported legacy revisions and modern `2026-07-28` are negotiated automatically.
+- **MCP App Bridge Core Configuration**: ECA credentials, preferred legacy protocol revision, scopes, origins, and session timeout. Endpoint and OAuth discovery URLs are derived from the org's My Domain. All three supported legacy revisions and modern `2026-07-28` are negotiated automatically.
 - **MCP App Bridge Lightning Out 2.0**: one generated MCP UI tool and one Lightning Out component per enabled record.
 - **MCP App Bridge Event Mapping**: an LWC-to-host message or host-to-LWC action related to a Lightning Out configuration.

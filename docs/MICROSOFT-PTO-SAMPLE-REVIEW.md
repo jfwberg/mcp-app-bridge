@@ -19,7 +19,11 @@ The sample pins MCP SDK `1.24.0` and ext-apps `1.0.0`; its source does not force
 
 The empty `capabilities` object in the sample's plugin manifest is a plugin-manifest setting, not an MCP initialize message. Likewise the React `useApp` capabilities object belongs to the widget-to-host handshake, not Microsoft-to-server negotiation.
 
-## Recommended comparison
+## Subsequent result
+
+On 6 October 2026, the packaged MCP App Bridge integration rendered a Salesforce LWC in Teams. The tested Copilot Studio agent/connector path did not fetch the UI resource. Proxy OAuth popup headers and Salesforce trusted iframe domains were also corrected; see [compatibility](COMPATIBILITY.md). The sample comparison below records the earlier diagnostic approach. The current package uses the published v2.4 `mcp_tool_description` property rather than the sample?s older `x-mcp_tool_description`.
+
+## Original comparison procedure
 
 1. Run the unmodified PTO widget server and invoke `collect-pto-request` through the same Copilot Studio/Teams connector path. Record initialize, discovery, tool call, and whether `resources/read` follows. This tests the endpoint independently of Salesforce and nested frames.
 2. Test the same endpoint through the included declarative-agent package. If only this route renders, investigate the connector/host integration rather than the Salesforce resource handler.

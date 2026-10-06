@@ -49,7 +49,7 @@ The generated manifests passed validation against Microsoft's published Teams v1
 ## First rendering test
 
 1. Open the installed MCP App Bridge agent in the supported Microsoft 365 host and request “Open a form to create one Account.” Complete Salesforce sign-in when prompted.
-2. Check proxy logs for `tools/call` with `open_demo_record_creator`, then `resources/read` for the pinned v8 URI. That second request is the first success criterion for this experiment.
+2. Check MCP endpoint logs (or proxy logs when using the proxy) for `tools/call` with `open_demo_record_creator`, then `resources/read` for the pinned v8 URI. That second request confirms the host has started loading the UI.
 3. After the HTML loads, check `bootstrap_lightning_out` and subsequent lifecycle diagnostics. A failure here is separate from failure to fetch the resource. Salesforce iframe/CSP policy and host support still need real-host testing.
 4. Save a test record only when ready; the form writes to the EZ Form org.
 

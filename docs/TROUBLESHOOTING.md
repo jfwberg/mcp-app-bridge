@@ -1,5 +1,17 @@
 # Troubleshooting
 
+## Teams tool works but no UI resource is requested
+
+Use the Microsoft [appPackage integration](../appPackage/README.md). The Copilot Studio agent/connector route tested here discovers and invokes tools but does not render MCP Apps UI. The packaged Teams integration rendered a Salesforce LWC on 6 October 2026. Enable host developer mode with `-developer on` and inspect Actions and authentication errors. Do not infer runtime UI support from the discovery client's empty capabilities alone.
+
+## OAuth completes but Microsoft cannot finish the connection
+
+Check proxy OAuth navigation responses for `Cross-Origin-Opener-Policy: same-origin`. In the confirmed setup, those routes needed `unsafe-none` to preserve communication with the opening window. Start a fresh flow after changing headers. A null `window.opener` is a clue, but may also mean the tab was opened without an opener initially. Keep authorization, token, and refresh endpoints consistent: proxy-wrapped authorization codes must be redeemed through the matching proxy token endpoint. The OAuth registration Base URL must match the packaged MCP endpoint. Successful upstream token exchange alone does not prove Microsoft stored the token or completed the browser connection.
+
+## Salesforce blocks Teams with frame-ancestors
+
+This is Salesforce's embedding policy, distinct from the host's `frame-src`. Add every actual ancestor origin to Salesforce Trusted Domains for Inline Frames. In the working Teams deployment, the origins required `https://*.widget-renderer.usercontent.microsoft` and cloud Microsoft ancestors including `https://m365copilotapp.svc.cloud.microsoft` and `https://teams.cloud.microsoft`. The renderer uses `.microsoft`, not `.microsoft.com`; retain older entries where other hosts need them. Inspect `Array.from(location.ancestorOrigins)` in the relevant frame context and compare it with the effective policy. Resource `frameDomains` cannot relax Salesforce's policy.
+
 Start by enabling [diagnostic logging](LOGGING.md), reproduce the problem once, and then disable it. The absence of a follow-up milestone is often as useful as an explicit error.
 
 ## MCP negotiation stops before tools/list
