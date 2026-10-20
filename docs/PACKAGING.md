@@ -2,7 +2,7 @@
 
 ## Before creating a version
 
-- Confirm namespace `mcpapp` and API version 67.0 are intentional.
+- Confirm namespace `mcpapp` and API version 68.0 are intentional.
 - Confirm only the Record Creator and Record Viewer examples ship.
 - Keep all org URLs, OAuth clients, secrets, tokens, and Lightning Out app IDs out of package source.
 - Keep the packaged core and demo configuration records disabled.

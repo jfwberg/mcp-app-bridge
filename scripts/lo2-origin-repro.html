@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lightning Out origin reproduction</title>
+<style>
+body{font:16px system-ui;max-width:1400px;margin:24px auto;padding:0 16px}label{display:block;margin:12px 0}input{display:block;width:100%;box-sizing:border-box;padding:8px}button,select{padding:8px}iframe{width:100%;height:850px;border:1px solid #aaa}pre{white-space:pre-wrap;background:#eee;padding:12px}
+</style>
+<h1>Lightning Out origin reproduction</h1>
+<p>Serve this page over HTTPS. Compare a normal URL frame with an inherited-origin srcdoc frame. Each run needs a fresh single-use frontdoor URL. Credentials stay in memory; nothing is saved or included in the results.</p>
+<form id="setup">
+<label>Salesforce org origin<input id="org" type="url" placeholder="https://example.my.salesforce.com" required></label>
+<label>Lightning Out app ID<input id="app" pattern="[A-Za-z0-9]{18}" required></label>
+<label>Component name<input id="component" placeholder="example-component" pattern="[a-z][a-z0-9_]*-[a-z][a-zA-Z0-9-]*" required></label>
+<label>Fresh frontdoor URL<input id="frontdoor" type="password" autocomplete="off" required></label>
+<label>Frame mode <select id="mode"><option value="srcdoc">Teams-like: srcdoc (URL origin null)</option><option value="normal">Control: normal URL</option></select></label>
+<button>Run Lightning Out</button>
+</form>
+<pre id="results">Waiting to run.</pre>
+<div id="frame"></div>
+<script>
+// The same runtime is used in both frame modes; Salesforce's loader is unmodified.
+function frameRuntime() {
+  const layout=document.createElement('style');
+  layout.textContent='html,body{margin:0;width:100%;height:100%;min-height:0}body{display:flex;flex-direction:column;overflow:hidden}lightning-out-application{display:block;flex:0 0 auto;width:100%}[data-repro-component]{display:block;flex:1;min-height:0;width:100%;height:100%}';
+  document.head.append(layout);
+  const report = value => parent.postMessage({kind:'lo2-origin-repro',value}, window.origin);
+  const snapshot = {effectiveOrigin:window.origin,urlOrigin:location.origin,protocol:location.protocol};
+  document.body.textContent='Waiting for Lightning Out configuration…';
+  report({stage:'FRAME_ORIGINS',...snapshot});
+  let started=false;
+  addEventListener('message',async event=>{
+    if(started || event.source!==parent || event.origin!==window.origin || event.data?.kind!=='lo2-origin-config')return;
+    started=true;
+    const {org,app,component,frontdoor}=event.data.config;
+    const milestone=stage=>report({stage,...snapshot});
+    // Do not forward exception messages or iframe URLs: they can contain credentials.
+    addEventListener('error',()=>milestone('FRAME_SCRIPT_ERROR'));
+    addEventListener('unhandledrejection',()=>milestone('FRAME_UNHANDLED_REJECTION'));
+    try {
+      document.body.textContent='Loading Lightning Out…';
+      await new Promise((resolve,reject)=>{
+        const script=document.createElement('script');
+        script.src=org+'/lightning/lightning.out.latest/index.iife.prod.js';
+        script.onload=resolve;script.onerror=reject;document.head.append(script);
+      });
+      milestone('LIGHTNING_LIBRARY_LOADED');
+      await customElements.whenDefined('lightning-out-application');
+      const application=document.createElement('lightning-out-application');
+      application.setAttribute('app-id',app);application.setAttribute('components',component);
+      application.setAttribute('frontdoor-url',frontdoor);
+      application.addEventListener('lo.application.error',()=>milestone('APPLICATION_ERROR'));
+      document.body.replaceChildren(application);milestone('APPLICATION_ATTACHED');
+      await customElements.whenDefined(component);
+      const element=document.createElement(component);
+      element.setAttribute('data-repro-component','');
+      element.style.width='100%';element.style.height='100%';
+      element.addEventListener('lo.component.ready',()=>milestone('COMPONENT_READY'));
+      element.addEventListener('lo.component.error',()=>milestone('COMPONENT_ERROR'));
+      document.body.append(element);milestone('COMPONENT_ATTACHED');
+    } catch {milestone('REPRO_LOAD_FAILED');}
+  });
+}
+
+if(new URLSearchParams(location.search).has('child')) {
+  document.body.replaceChildren();frameRuntime();
+} else {
+  let activeFrame;
+  const results=document.getElementById('results');
+  addEventListener('message',event=>{
+    if(event.source!==activeFrame?.contentWindow || event.origin!==window.origin || event.data?.kind!=='lo2-origin-repro')return;
+    results.textContent+=JSON.stringify(event.data.value)+'\n';
+  });
+  document.getElementById('setup').addEventListener('submit',event=>{
+    event.preventDefault();
+    if(location.protocol!=='https:' && location.hostname!=='localhost') {
+      results.textContent='Serve this page over HTTPS (localhost is allowed for an initial origin-only check).';return;
+    }
+    const org=new URL(document.getElementById('org').value);
+    const frontdoor=document.getElementById('frontdoor').value;
+    let frontdoorUrl;
+    try {frontdoorUrl=new URL(frontdoor);}catch {results.textContent='Enter a valid frontdoor URL.';return;}
+    if(org.protocol!=='https:' || org.username || org.password || frontdoorUrl.origin!==org.origin || frontdoorUrl.pathname!=='/secur/frontdoor.jsp') {
+      results.textContent='Use an HTTPS Salesforce org origin and a frontdoor URL from the same origin.';return;
+    }
+    const config={org:org.origin,app:document.getElementById('app').value,component:document.getElementById('component').value,frontdoor};
+    document.getElementById('frontdoor').value='';
+    const mode=document.getElementById('mode').value;
+    results.textContent='Mode: '+mode+'\n';
+    activeFrame=document.createElement('iframe');activeFrame.title='Lightning Out reproduction';
+    activeFrame.onload=()=>activeFrame.contentWindow.postMessage({kind:'lo2-origin-config',config},window.origin);
+    if(mode==='srcdoc') {
+      // No opaque-origin sandbox: srcdoc should inherit the parent's effective origin.
+      activeFrame.srcdoc='<!doctype html><html><head><meta charset="utf-8"></head><body><script>('+frameRuntime.toString()+')();<'+ '/script></body></html>';
+    } else {
+      const url=new URL(location.href);url.search='?child=1';url.hash='';activeFrame.src=url.href;
+    }
+    document.getElementById('frame').replaceChildren(activeFrame);
+  });
+}
+</script>
+</html>

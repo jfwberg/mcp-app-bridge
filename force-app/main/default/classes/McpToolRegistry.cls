@@ -17,6 +17,8 @@ public with sharing class McpToolRegistry {
         String name = (String)params.get('name');
         Map<String,Object> args = (Map<String,Object>)params.get('arguments');
         if (args == null) args = new Map<String,Object>();
+        McpDiagnostics.setLoadCorrelationId(null);
+        if(name=='bootstrap_lightning_out'||name=='log_bridge_diagnostic'||name=='bridge_event')McpDiagnostics.setLoadCorrelationId(args.get('loadCorrelationId'));
         if (name == 'bootstrap_lightning_out') return bootstrap(args);
         if (name == 'bridge_event') return receiveEvent(args);
         if (name == 'log_bridge_diagnostic') return recordDiagnostic(args);
@@ -122,7 +124,7 @@ public with sharing class McpToolRegistry {
         return new Map<String,Object>{
             'name' => 'bootstrap_lightning_out', 'title' => 'Create Lightning Out session',
             'description' => 'Create a fresh, single-use Salesforce Lightning Out session for the mounted app.',
-            'inputSchema' => new Map<String,Object>{'type' => 'object', 'properties' => new Map<String,Object>{'configKey' => new Map<String,Object>{'type' => 'string'}}, 'required' => new List<String>{'configKey'}, 'additionalProperties' => false},
+            'inputSchema' => new Map<String,Object>{'type' => 'object', 'properties' => new Map<String,Object>{'loadCorrelationId' => new Map<String,Object>{'type'=>'string','pattern'=>'^load-[a-f0-9]{32}$'}, 'configKey' => new Map<String,Object>{'type' => 'string'}}, 'required' => new List<String>{'configKey'}, 'additionalProperties' => false},
             '_meta' => meta, 'securitySchemes' => oauthSecuritySchemes()
         };
     }
@@ -158,7 +160,7 @@ public with sharing class McpToolRegistry {
             'name' => 'bridge_event', 'title' => 'Route component event',
             'description' => 'Validate and route an event from a configured Lightning Out component.',
             'inputSchema' => new Map<String,Object>{'type' => 'object', 'properties' => new Map<String,Object>{
-                'configKey' => new Map<String,Object>{'type' => 'string'}, 'mappingKey' => new Map<String,Object>{'type' => 'string'}, 'payload' => new Map<String,Object>()
+                'loadCorrelationId' => new Map<String,Object>{'type'=>'string','pattern'=>'^load-[a-f0-9]{32}$'}, 'configKey' => new Map<String,Object>{'type' => 'string'}, 'mappingKey' => new Map<String,Object>{'type' => 'string'}, 'payload' => new Map<String,Object>()
             }, 'required' => new List<String>{'configKey','mappingKey','payload'}, 'additionalProperties' => false},
             '_meta' => meta, 'securitySchemes' => oauthSecuritySchemes()
         };
@@ -169,7 +171,7 @@ public with sharing class McpToolRegistry {
             'name' => 'log_bridge_diagnostic', 'title' => 'Record bridge diagnostic',
             'description' => 'Record a sanitized lifecycle milestone from the mounted MCP App.',
             'inputSchema' => new Map<String,Object>{'type' => 'object', 'properties' => new Map<String,Object>{
-                'configKey' => new Map<String,Object>{'type' => 'string'},
+                'loadCorrelationId' => new Map<String,Object>{'type'=>'string','pattern'=>'^load-[a-f0-9]{32}$'}, 'configKey' => new Map<String,Object>{'type' => 'string'},
                 'stage' => new Map<String,Object>{'type' => 'string'},
                 'outcome' => new Map<String,Object>{'type' => 'string','enum'=>new List<String>{'SUCCEEDED','FAILED'}},
                 'message' => new Map<String,Object>{'type' => 'string','maxLength'=>255}
@@ -180,10 +182,18 @@ public with sharing class McpToolRegistry {
     private static Map<String,Object> recordDiagnostic(Map<String,Object> args) {
         String configKey=(String)args.get('configKey'); String stage=(String)args.get('stage');
         String outcome=(String)args.get('outcome'); String message=(String)args.get('message');
-        Set<String> allowedStages=new Set<String>{'UI_INITIALIZED','BOOTSTRAP_RECEIVED','LIGHTNING_LIBRARY_LOADED','APPLICATION_ATTACHED','COMPONENT_ATTACHED','COMPONENT_READY','APPLICATION_ERROR','COMPONENT_ERROR','WIDGET_ERROR'};
+        Set<String> allowedStages=new Set<String>{'UI_INITIALIZED','BOOTSTRAP_RECEIVED','LIGHTNING_LIBRARY_LOADED','APPLICATION_ATTACHED','COMPONENT_ATTACHED','COMPONENT_READY','APPLICATION_ERROR','COMPONENT_ERROR','WIDGET_ERROR','WIDGET_EFFECTIVE_ORIGIN','WIDGET_URL_ORIGIN','WIDGET_REFERRER_ORIGIN','HOST_MESSAGE_ORIGIN'};
         if(String.isBlank(configKey)||!allowedStages.contains(stage)||(outcome!='SUCCEEDED'&&outcome!='FAILED'))throw new McpProtocolException(-32602,400,'Invalid bridge diagnostic.');
         McpLightningOutConfig.getByKey(configKey);
         McpDiagnostics.Entry entry=new McpDiagnostics.Entry();entry.stage=stage;entry.operation='WIDGET_LIFECYCLE';entry.outcome=outcome;entry.configKey=configKey;entry.toolName='log_bridge_diagnostic';entry.message=message;
+        Set<String> originStages=new Set<String>{'WIDGET_EFFECTIVE_ORIGIN','WIDGET_URL_ORIGIN','WIDGET_REFERRER_ORIGIN','HOST_MESSAGE_ORIGIN'};
+        if(originStages.contains(stage)) {
+            // Accept origins only, excluding paths, credentials and queries.
+            if(message==null || !(message=='null' || message=='unavailable' || Pattern.matches('^https?://[a-zA-Z0-9.-]+(:[0-9]{1,5})?$',message)))
+                throw new McpProtocolException(-32602,400,'Invalid diagnostic origin.');
+            entry.details=new Map<String,Object>{'origin'=>message,'literalNull'=>message=='null','unavailable'=>message=='unavailable'};
+            entry.message='Observed browser origin; see Details JSON.';
+        }
         if(outcome=='FAILED')McpDiagnostics.error(entry);else McpDiagnostics.info(entry);
         return toolResult('Bridge diagnostic accepted.',new Map<String,Object>{'accepted'=>true});
     }

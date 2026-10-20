@@ -22,7 +22,7 @@ Logging is best-effort and never changes an MCP response. Successful milestones 
 | Stage | Stable lifecycle checkpoint listed below. |
 | Operation | Broader activity, such as an MCP method, `LIGHTNING_OUT_BOOTSTRAP`, or `WIDGET_LIFECYCLE`. |
 | Outcome | `SUCCEEDED` or `FAILED`. Error-event records are normalized to `FAILED`. |
-| Correlation ID | String form of the JSON-RPC request ID when one exists, such as `openai-mcp-discover`; it is not an MCP session ID. |
+| Correlation ID | Widget load ID when supplied; otherwise the JSON-RPC request ID, such as `openai-mcp-discover`. It is not an MCP session ID. |
 | Configuration Key | Lightning Out configuration developer name associated with the event. |
 | MCP Method | JSON-RPC method, for example `server/discover`, `tools/list`, or `tools/call`. |
 | Tool Name | MCP tool involved in the request or widget diagnostic. |
@@ -35,6 +35,10 @@ Logging is best-effort and never changes an MCP response. Successful milestones 
 | User ID / Organization ID | Salesforce execution context that emitted the event. |
 
 Blank fields mean that the value is not meaningful or was unavailable for that stage; they do not by themselves indicate an error.
+
+Each widget mount generates a fresh `load-` ID followed by 32 hexadecimal characters before initialization. Filter **Correlation ID** by that value to group its origin snapshots, widget milestones, bootstrap/JWT/single-access logs, and subsequent component-event requests. The same ID appears in origin console entries. Reloading or reopening the widget generates a new ID. No new object or field is needed.
+
+For requests carrying a load ID, `MCP_REQUEST` uses it as Correlation ID and retains the JSON-RPC request ID in Details JSON as `requestId`. Other requests continue to use the JSON-RPC request ID. Discovery, resource retrieval, and the initial model tool call precede creation of the widget instance and cannot share its ID. The ID is diagnostic context, not a credential. Older widgets that omit it remain supported. Queued widget diagnostics are persisted after bootstrap supplies the logging setting; if bootstrap never completes, those browser milestones cannot be sent.
 
 ## Stage reference
 
@@ -83,6 +87,17 @@ An absent Error Type on a successful record is normal. `UNEXPECTED_ERROR` on `MC
 - `COMPONENT_READY` exists: OAuth, frontdoor exchange, Lightning Out loading, application attachment, and component mounting all completed.
 
 ## Security behavior
+
+### Browser origin investigation
+
+With Logging Enabled, the widget writes four separate origin checkpoints to the existing log object and to the browser console (prefix `[MCP App Bridge origin]`):
+
+- `WIDGET_EFFECTIVE_ORIGIN`: `window.origin`, captured before the Lightning Out library loads.
+- `WIDGET_URL_ORIGIN`: `location.origin`, which can differ from the effective origin in a sandbox.
+- `WIDGET_REFERRER_ORIGIN`: origin only from `document.referrer`; it can be unavailable because of referrer policy.
+- `HOST_MESSAGE_ORIGIN`: `event.origin` of the first message from the widget's direct parent. This describes the parent, not the widget itself.
+
+Read `Details_JSON__c` for `origin`, `literalNull`, and `unavailable`. The string `"null"` is kept distinct from missing or unsupported values (`unavailable`). Compare a Teams reproduction with a working MCP client. These are observations, not proof of the source of Salesforce's `loAppOrigin` parameter: the widget cannot inspect Salesforce's cross-origin auth-frame internals. No query strings, paths, fragments, message payloads, or frontdoor URLs are included. Logging does not modify origin values or authentication behavior.
 
 The logger never intentionally stores access tokens, JWT assertions, Salesforce session IDs, upstream response bodies, or complete frontdoor URLs. Messages redact bearer-like values, `otp`, `access_token`, and `assertion` query values, then redact HTTP(S) URLs. Structured details are constructed internally from allowlisted operational values. Error-event message and details fields are limited to 255 characters; object records allow longer sanitized text.
 

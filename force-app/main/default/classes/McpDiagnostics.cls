@@ -2,6 +2,16 @@
 public without sharing class McpDiagnostics {
     @TestVisible private static Boolean testEnabled;
 
+    // Transaction-scoped widget load context; never an authorization token.
+    public static String loadCorrelationId { get; private set; }
+    public static void setLoadCorrelationId(Object value) {
+        loadCorrelationId=null;
+        if(value==null)return;
+        if(!(value instanceof String) || !Pattern.matches('^load-[a-f0-9]{32}$',(String)value))
+            throw new McpProtocolException(-32602,400,'Invalid load correlation ID.');
+        loadCorrelationId=(String)value;
+    }
+
     public class Entry {
         public String stage;
         public String operation;
@@ -78,7 +88,7 @@ public without sharing class McpDiagnostics {
         return new MCP_Bridge_Log__c(
             Occurred_At__c=System.now(), Level__c=level, Stage__c=truncateValue(entry.stage,80),
             Operation__c=truncateValue(entry.operation,80), Outcome__c=truncateValue(entry.outcome,40),
-            Correlation_Id__c=truncateValue(entry.correlationId,255), Config_Key__c=truncateValue(entry.configKey,80),
+            Correlation_Id__c=truncateValue(loadCorrelationId==null?entry.correlationId:loadCorrelationId,255), Config_Key__c=truncateValue(entry.configKey,80),
             MCP_Method__c=truncateValue(entry.mcpMethod,80), Tool_Name__c=truncateValue(entry.toolName,100),
             HTTP_Status__c=entry.httpStatus, Duration_Ms__c=entry.durationMs,
             Error_Type__c=truncateValue(entry.errorType,100), Message__c=truncateValue(sanitize(entry.message),32768),
@@ -90,7 +100,7 @@ public without sharing class McpDiagnostics {
     private static MCP_Bridge_Log_Event__e toEvent(Entry entry) {
         return new MCP_Bridge_Log_Event__e(
             Occurred_At__c=System.now(), Stage__c=truncateValue(entry.stage,80), Operation__c=truncateValue(entry.operation,80),
-            Correlation_Id__c=truncateValue(entry.correlationId,255), Config_Key__c=truncateValue(entry.configKey,80),
+            Correlation_Id__c=truncateValue(loadCorrelationId==null?entry.correlationId:loadCorrelationId,255), Config_Key__c=truncateValue(entry.configKey,80),
             MCP_Method__c=truncateValue(entry.mcpMethod,80), Tool_Name__c=truncateValue(entry.toolName,100),
             HTTP_Status__c=entry.httpStatus, Duration_Ms__c=entry.durationMs,
             Error_Type__c=truncateValue(entry.errorType,100), Message__c=truncateValue(sanitize(entry.message),255),

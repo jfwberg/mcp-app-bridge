@@ -57,6 +57,7 @@ global with sharing class McpRestEndpoint {
         McpDiagnostics.Entry entry=new McpDiagnostics.Entry(); entry.stage='MCP_REQUEST';entry.operation=method;entry.outcome=outcome;
         entry.correlationId=McpDiagnostics.correlationId(id);entry.mcpMethod=method;entry.toolName=tool;entry.httpStatus=status;
         entry.durationMs=duration;entry.errorType=errorType;entry.message=message;
+        if(McpDiagnostics.loadCorrelationId!=null)entry.details=new Map<String,Object>{'requestId'=>McpDiagnostics.correlationId(id)};
         if(outcome=='FAILED')McpDiagnostics.error(entry);else McpDiagnostics.info(entry);
     }
 }
