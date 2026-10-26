@@ -1,5 +1,7 @@
 # Client compatibility
 
+**Teams update (26 October 2026):** a subsequent srcdoc origin failure was reproduced despite `allow-same-origin` being present. The opt-in **LO2 JS From Static Resource** setting selects the local modified LO2 2.2.5 loader, which uses the valid effective `window.origin` instead of `location.origin` (`"null"` for srcdoc). It defaults off. Component loading succeeds in the standalone reproduction; the updated managed package in Teams still needs live validation. The earlier 6 October success remains a historical observation. See [diagnosis, activation, and rollback](TROUBLESHOOTING.md#teams-lightning-out-fails-with-invalid-target-origin-null).
+
 This page records observed interoperability results for MCP App Bridge. It distinguishes MCP transport success from UI-host framing restrictions: a client can successfully discover and call tools while still refusing to render the nested Salesforce iframe.
 
 ## Verified client matrix

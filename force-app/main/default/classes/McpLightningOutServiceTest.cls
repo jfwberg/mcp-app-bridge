@@ -48,6 +48,39 @@ private class McpLightningOutServiceTest {
         Test.stopTest();
     }
 
+    @IsTest static void shouldAllowStaticResourceRedirectOnlyForLocalLoader() {
+        McpBridgeCoreConfig.testRecord=new MCP_App_Bridge_Core_Config__mdt(LO2_JS_FROM_STATIC_RESOURCE__c=false);
+        String orgOrigin='https://example.my.salesforce.com';
+        Map<String,Object> meta=McpResourceRegistry.resourceMetadata(orgOrigin,'https://example.lightning.force.com','Test');
+        Map<String,Object> csp=(Map<String,Object>)((Map<String,Object>)meta.get('ui')).get('csp');
+        String fileOrigin='https://'+System.DomainCreator.getContentHostname();
+        Assert.areEqual(new List<String>{orgOrigin,fileOrigin},(List<String>)csp.get('resourceDomains'));
+        McpBridgeCoreConfig.testRecord.LO2_JS_FROM_STATIC_RESOURCE__c=true;
+        meta=McpResourceRegistry.resourceMetadata(orgOrigin,'https://example.lightning.force.com','Test');
+        csp=(Map<String,Object>)((Map<String,Object>)meta.get('ui')).get('csp');
+        List<String> domains=(List<String>)csp.get('resourceDomains');
+        String prefix=MCP_App_Bridge_Core_Config__mdt.SObjectType.getDescribe().getName().substringBefore('MCP_App_Bridge_Core_Config__mdt');
+        String packageName=String.isBlank(prefix)?'c':prefix.removeEnd('__');
+        Assert.areEqual(new List<String>{orgOrigin,fileOrigin,'https://example.lightning.force.com','https://'+System.DomainCreator.getVisualforceHostname(packageName)},domains);
+        Assert.isTrue(((List<String>)csp.get('frameDomains')).contains(fileOrigin));
+        Assert.areEqual(new List<String>{orgOrigin,'https://example.lightning.force.com'},(List<String>)csp.get('connectDomains'));
+    }
+
+    @IsTest static void shouldSelectHostedOrLocalModifiedLoader() {
+        McpLightningOutService.testSessionId='test-session';
+        McpLightningOutService.testOrgOrigin='https://example.my.salesforce.com';
+        McpLightningOutService.testFrontdoorUrl='https://example.my.salesforce.com/secur/frontdoor.jsp?otp=test-only';
+        McpBridgeCoreConfig.testRecord=new MCP_App_Bridge_Core_Config__mdt(LO2_JS_FROM_STATIC_RESOURCE__c=false);
+        McpLightningOutService.BootstrapConfig hosted=McpLightningOutService.createBootstrapConfig(config('example-component'));
+        Assert.areEqual('https://example.my.salesforce.com/lightning/lightning.out.latest/index.iife.prod.js',hosted.loaderUrl);
+        McpBridgeCoreConfig.testRecord.LO2_JS_FROM_STATIC_RESOURCE__c=true;
+        McpLightningOutService.BootstrapConfig local=McpLightningOutService.createBootstrapConfig(config('example-component'));
+        String typeName=MCP_App_Bridge_Core_Config__mdt.SObjectType.getDescribe().getName();
+        Assert.areEqual('https://example.my.salesforce.com/resource/'+typeName.substringBefore('MCP_App_Bridge_Core_Config__mdt')+'McpLo2Modified?v=2.2.5-origin-1',local.loaderUrl);
+        McpBridgeCoreConfig.testRecord=new MCP_App_Bridge_Core_Config__mdt();
+        Assert.isFalse(McpBridgeCoreConfig.get().lo2JsFromStaticResource,'Unset option must keep the hosted loader');
+    }
+
     @IsTest
     static void shouldRejectUnsafeComponentName() {
         Test.startTest();

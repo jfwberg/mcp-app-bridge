@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>LO2_JS_FROM_STATIC_RESOURCE__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Use the packaged local modified LO2 loader instead of Salesforce's hosted latest loader.</description>
+    <fieldManageability>SubscriberControlled</fieldManageability>
+    <inlineHelpText>Uses local modified LO2 2.2.5 with window.origin for Teams srcdoc hosting. Disabled uses Salesforce's hosted latest loader. This pinned local version requires separate maintenance for Salesforce updates.</inlineHelpText>
+    <label>LO2 JS From Static Resource</label>
+    <type>Checkbox</type>
+</CustomField>

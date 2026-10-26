@@ -1,5 +1,7 @@
 # Microsoft PTO sample comparison
 
+**Later Teams finding (26 October 2026):** this historical sample comparison predates the diagnosed LO2 srcdoc origin failure. **LO2 JS From Static Resource** now optionally selects a local modified LO2 2.2.5 loader that uses the effective origin. The standalone reproduction succeeds; packaged Teams validation is pending. This is separate from the connector/resource-discovery differences discussed below. See [current diagnosis and configuration](TROUBLESHOOTING.md#teams-lightning-out-fails-with-invalid-target-origin-null).
+
 Reviewed the user-provided `copilot-da-ptorequest-msgraph-mcpapp` project on 6 October 2026. The source was inspected without running its provisioning instructions or modifying the original project.
 
 ## Differences relevant to the missing resource read

@@ -32,11 +32,21 @@ public with sharing class McpResourceRegistry {
         return new Map<String,Object>{'contents'=>new List<Object>{new Map<String,Object>{'uri'=>uri,'mimeType'=>'text/html;profile=mcp-app','text'=>html,'_meta'=>metadata}}};
     }
 
-    private static Map<String,Object> resourceMetadata(String orgOrigin,String lightningOrigin,String description){
-        String fileOrigin=orgOrigin.replace('.my.salesforce.com','.file.force.com');
+    @TestVisible private static Map<String,Object> resourceMetadata(String orgOrigin,String lightningOrigin,String description){
+        String fileOrigin='https://'+System.DomainCreator.getContentHostname();
+        List<String> resourceDomains=new List<String>{orgOrigin,fileOrigin};
+        if(McpBridgeCoreConfig.get().lo2JsFromStaticResource){
+            // The resource redirect may pass through Lightning's /visualforce/session endpoint.
+            resourceDomains.add(lightningOrigin);
+            String typeName=MCP_App_Bridge_Core_Config__mdt.SObjectType.getDescribe().getName();
+            String prefix=typeName.substringBefore('MCP_App_Bridge_Core_Config__mdt');
+            String packageName=String.isBlank(prefix)?'c':prefix.removeEnd('__');
+            // Static resource requests can redirect from My Domain to the package's VF host.
+            resourceDomains.add('https://'+System.DomainCreator.getVisualforceHostname(packageName));
+        }
         Map<String,Object> csp=new Map<String,Object>{
             'connectDomains'=>new List<String>{orgOrigin,lightningOrigin},
-            'resourceDomains'=>new List<String>{orgOrigin},
+            'resourceDomains'=>resourceDomains,
             'frameDomains'=>new List<String>{orgOrigin,lightningOrigin,fileOrigin}
         };
         return new Map<String,Object>{'ui'=>new Map<String,Object>{'prefersBorder'=>true,'csp'=>csp}};

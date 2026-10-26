@@ -5,4 +5,5 @@
 <values><field>Protocol_Version__c</field><value xsi:type="xsd:string" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">2025-11-25</value></values>
 <values><field>Session_Timeout_Minutes__c</field><value xsi:type="xsd:double" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">30</value></values>
 <values><field>Logging_Enabled__c</field><value xsi:type="xsd:boolean" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">false</value></values>
+<values><field>LO2_JS_FROM_STATIC_RESOURCE__c</field><value xsi:type="xsd:boolean" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">false</value></values>
 </CustomMetadata>

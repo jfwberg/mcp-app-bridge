@@ -1,5 +1,7 @@
 # MCP App Bridge for Microsoft 365
 
+**Teams srcdoc loader fix (26 October 2026):** after installing a bridge version containing `McpLo2Modified`, optionally enable **LO2 JS From Static Resource** on **MCP App Bridge Core Configuration ? Default**. The local modified LO2 2.2.5 loader uses the effective origin because Teams' inner srcdoc document has a null URL origin. Disabled retains Salesforce's hosted latest loader. This is a Salesforce-side setting, not an app manifest or OAuth registration option. The standalone reproduction succeeds; packaged Teams validation is pending. See [details and rollback](../docs/TROUBLESHOOTING.md#teams-lightning-out-fails-with-invalid-target-origin-null).
+
 For repeatable creation and updates, use the [appPackage workflow and reusable Codex prompt](../docs/MICROSOFT-APP-PACKAGE-WORKFLOW.md).
 
 This is a pinned declarative-agent package based on [Microsoft's employee-training sample](https://github.com/microsoft/mcp-interactiveUI-samples/tree/main/mcp-apps/employee-training/node/appPackage). The generated package currently uses the direct EZ Form Salesforce MCP endpoint; no Salesforce code deployment is required. The user confirmed Salesforce LWC rendering in Teams on 6 October 2026 after configuring proxy OAuth headers and Salesforce iframe trusted domains.

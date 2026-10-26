@@ -1,5 +1,19 @@
 # Troubleshooting
 
+## Teams Lightning Out fails with invalid target origin 'null'
+
+**Local modified loader option (26 October 2026):** enable **LO2 JS From Static Resource** (`LO2_JS_FROM_STATIC_RESOURCE__c`) on **Setup → Custom Metadata Types → MCP App Bridge Core Configuration → Manage Records → Default**. This selects the packaged `McpLo2Modified` JavaScript resource. The setting is subscriber-controlled and defaults to false; disabled uses Salesforce's hosted latest loader. Start a fresh widget load after saving. Turn it off and start another fresh load to return to the hosted version.
+
+Teams was observed hosting the widget inside an HTTPS renderer and an inner `srcdoc` iframe, both with `allow-same-origin`. In the inner document, `location.origin` is the string `"null"` because its URL is `about:srcdoc`, while `window.origin` is the valid inherited HTTPS renderer origin. This does not establish that Microsoft removed sandbox permissions or when its renderer changed.
+
+The inspected LO2 2.2.5 loader assigns `loAppOrigin` from `window.location.origin` in two places. Its generated auth page then attempts `postMessage` with target origin `"null"`, which the browser rejects. Authentication/bootstrap can therefore succeed without the component reaching ready. Adding a top-level frontdoor query parameter or a `lo-app-origin` attribute did not resolve the reported reproduction.
+
+The local modified version changes those two assignments to use the effective `window.origin`, validates that it is HTTP(S), and rejects an override that differs from the real effective origin. It does not remove message checks, use wildcard target origins, or make opaque origins usable. It still loads Salesforce authentication and component assets; it is a pinned loader, not a fully offline runtime.
+
+**Validation status:** the user confirmed successful component loading with the local modified loader in the standalone `srcdoc` reproduction on 26 October 2026. The updated managed package and Teams integration are awaiting live validation. Verify `COMPONENT_READY`, component inputs, events, and session behavior after installation. Existing OAuth and ancestor-domain setup requirements still apply.
+
+Use the origin checkpoints in [Logging](LOGGING.md#browser-origin-investigation) to compare clients and group entries by the widget load Correlation ID. See [Setup](SETUP.md#local-modified-lo2-loader-for-teams) and [local modified loader maintenance](LO2-LOCAL-MODIFIED.md). The pinned local version does not automatically receive Salesforce loader updates.
+
 ## Teams tool works but no UI resource is requested
 
 Use the Microsoft [appPackage integration](../appPackage/README.md). The Copilot Studio agent/connector route tested here discovers and invokes tools but does not render MCP Apps UI. The packaged Teams integration rendered a Salesforce LWC on 6 October 2026. Enable host developer mode with `-developer on` and inspect Actions and authentication errors. Do not infer runtime UI support from the discovery client's empty capabilities alone.
@@ -131,3 +145,9 @@ When the core record contains an ECA Consumer Key and ECA Certificate Name, the 
 The bridge deliberately does not include the signed assertion, access token, or Salesforce token-response body in these errors.
 
 For JWT bearer flow, the bridge derives the assertion audience from `Organization.IsSandbox`: `https://test.salesforce.com` for sandbox and scratch orgs, otherwise `https://login.salesforce.com`. The token request itself uses the current org's My Domain. An `invalid_client` response normally means the configured consumer key does not identify the JWT-enabled ECA in that org.
+
+## Local LO2 static resource blocked by script-src
+
+The local static-resource request can redirect from My Domain to the package-specific Visualforce host (for example, `https://ORG--mcpapp.vf.force.com`). When the local loader is enabled, MCP resource metadata includes that exact host in `ui.csp.resourceDomains`, resolved with Salesforce DomainCreator. Both resources/list and resources/read share this policy. Start a fresh widget/resource load after upgrading so the host receives the updated CSP; an already-mounted iframe retains its old policy. A script-src rejection for that host indicates missing or cached resource CSP metadata, not an OAuth failure.
+
+Static-resource requests can also pass through the Lightning origin's `/visualforce/session` endpoint before reaching the Visualforce resource. When the local loader is enabled, resourceDomains includes the Lightning origin as well. Inclusion in connectDomains or frameDomains alone does not permit a script redirect there. This addresses CSP only; if the session endpoint subsequently returns HTML, authentication or resource delivery still needs investigation.

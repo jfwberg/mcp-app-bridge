@@ -59,3 +59,18 @@ test('missing effective origin remains distinct from the literal null string', (
   const { sent } = mount(true, null);
   assert.equal(sent[0].params.arguments.message, 'unavailable');
 });
+
+test('loader uses selected same-org resource, defaults to hosted, and rejects other origins', async () => {
+  const definition=source.match(/const loadScript=([^\n]+);/)[1];
+  const scripts=[];
+  const load=runInNewContext('('+definition+')',{
+    URL, document:{createElement:()=>({addEventListener(name,callback){if(name==='load')this.loaded=callback;}}),head:{append(script){scripts.push(script);script.loaded();}}}
+  });
+  const org='https://example.my.salesforce.com';
+  await load(org,org+'/resource/mcpapp__McpLo2Modified?v=2.2.5-origin-1');
+  assert.equal(scripts[0].src,org+'/resource/mcpapp__McpLo2Modified?v=2.2.5-origin-1');
+  await load(org);
+  assert.equal(scripts[1].src,org+'/lightning/lightning.out.latest/index.iife.prod.js');
+  await assert.rejects(load(org,'https://other.example/loader.js'),/Invalid Lightning Out loader origin/);
+  assert.equal(scripts.length,2);
+});

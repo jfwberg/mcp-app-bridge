@@ -11,6 +11,7 @@ public with sharing class McpBridgeCoreConfig {
     public String protocolVersion = '2025-11-25';
     public Integer timeoutMinutes = 30;
     public Boolean loggingEnabled = false;
+    public Boolean lo2JsFromStaticResource = false;
     public Set<String> allowedOrigins = new Set<String>();
 
     public static McpBridgeCoreConfig get() {
@@ -31,6 +32,7 @@ public with sharing class McpBridgeCoreConfig {
         value.protocolVersion = defaultIfBlank(record.Protocol_Version__c, value.protocolVersion);
         value.timeoutMinutes = record.Session_Timeout_Minutes__c == null ? 30 : Integer.valueOf(record.Session_Timeout_Minutes__c);
         value.loggingEnabled = record.Logging_Enabled__c == true;
+        value.lo2JsFromStaticResource = record.LO2_JS_FROM_STATIC_RESOURCE__c == true;
         if (String.isNotBlank(record.Allowed_Origins__c)) {
             value.allowedOrigins.addAll(record.Allowed_Origins__c.split('[,\\n]'));
         }

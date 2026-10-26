@@ -1,5 +1,7 @@
 # Create or update a Microsoft appPackage
 
+**Salesforce prerequisite for Teams srcdoc hosts:** if LO2 fails with invalid target origin `null`, install a bridge package containing `McpLo2Modified`, enable **LO2 JS From Static Resource** in Default Core Configuration, and start a fresh widget load. This does not require changing the Microsoft manifests or OAuth registration. The setting defaults off; it selects the pinned local modified loader to use the effective origin. Reproduction-page loading is confirmed, with packaged Teams validation pending. See [the Teams origin fix](TROUBLESHOOTING.md#teams-lightning-out-fails-with-invalid-target-origin-null).
+
 Use this workflow for the packaged Microsoft Teams/Microsoft 365 integration. The Copilot Studio agent/connector route tested here does not render MCP Apps UI.
 
 ## Rebuild the existing EZ Form package

@@ -51,6 +51,10 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
+                <field>LO2_JS_FROM_STATIC_RESOURCE__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
                 <field>ECA_Consumer_Key__c</field>
             </layoutItems>
         </layoutColumns>

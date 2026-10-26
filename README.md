@@ -1,5 +1,7 @@
 # Salesforce MCP App Bridge
 
+**Teams srcdoc compatibility:** if Lightning Out fails with invalid target origin `null`, enable **LO2 JS From Static Resource** on the Default Core Configuration to use the local modified LO2 2.2.5 loader. It uses the inherited effective origin instead of the srcdoc URL origin. The option defaults off; the standalone reproduction passes, while packaged Teams validation is pending. See [diagnosis and setup](docs/TROUBLESHOOTING.md#teams-lightning-out-fails-with-invalid-target-origin-null).
+
 Salesforce MCP App Bridge is a managed-package MCP server that turns configured Lightning Web Components into authenticated MCP Apps and generated tools without adding component-specific code to the bridge.
 
 The current bridge supports four protocol revisions on one Apex REST endpoint:
@@ -41,7 +43,7 @@ Salesforce does expose the `/.well-known/openid-configuration` endpoint which so
 
 ## Package Info
 
-**Managed Package v68.0 - 0.5** `/packaging/installPackage.apexp?p0=04tP3000002GshdIAC`
+**Managed Package v68.0 - 0.9** `/packaging/installPackage.apexp?p0=04tP3000002Hk3hIAC`
 
 ## Start here
 

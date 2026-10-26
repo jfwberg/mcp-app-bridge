@@ -1,5 +1,9 @@
 # Managed-package release checklist
 
+## Teams local modified loader
+
+The package includes `McpLo2Modified` and the subscriber-controlled **LO2 JS From Static Resource** core metadata checkbox. Keep its packaged Default value false so Salesforce's hosted latest loader remains the default. Subscribers can enable the local modified LO2 2.2.5 loader for Teams srcdoc origin failures, then start a fresh widget load. Preserve upstream license notices and rebuild both loader copies together when updating the pinned version. The standalone reproduction succeeds; packaged Teams validation is pending. See [Teams diagnosis](TROUBLESHOOTING.md#teams-lightning-out-fails-with-invalid-target-origin-null) and [loader maintenance](LO2-LOCAL-MODIFIED.md).
+
 ## Before creating a version
 
 - Confirm namespace `mcpapp` and API version 68.0 are intentional.

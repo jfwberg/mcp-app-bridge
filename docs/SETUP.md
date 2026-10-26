@@ -1,6 +1,6 @@
 # Installation and org setup
 
-For Microsoft Teams, use the [Microsoft appPackage setup](../appPackage/README.md). At this stage, the tested Copilot Studio agent/connector route exposes tools but does not render MCP Apps UI; a packaged declarative-agent integration is required. Teams LWC rendering was confirmed on 6 October 2026. Configure both OAuth popup headers and Salesforce trusted iframe domains as described in [client compatibility](COMPATIBILITY.md).
+For Microsoft Teams, use the [Microsoft appPackage setup](../appPackage/README.md). At this stage, the tested Copilot Studio agent/connector route exposes tools but does not render MCP Apps UI; a packaged declarative-agent integration is required. Teams LWC rendering was confirmed on 6 October 2026. Configure both OAuth popup headers and Salesforce trusted iframe domains as described in [client compatibility](COMPATIBILITY.md). For the subsequently diagnosed srcdoc origin failure, see [Local modified LO2 loader for Teams](#local-modified-lo2-loader-for-teams); its checkbox defaults off, the standalone reproduction passes, and packaged Teams validation is pending.
 
 ## 1. Assign access
 
@@ -76,3 +76,13 @@ Reconnect the client whenever tool configuration or a versioned `ui://` resource
 The same endpoint supports both MCP protocol eras. Legacy clients negotiate `2024-11-05`, `2025-06-18`, or `2025-11-25` through `initialize`; the bridge does not assign the optional `MCP-Session-Id`, and subsequent requests identify their revision with `MCP-Protocol-Version` (optional for `2024-11-05`; headerless stateless requests use that revision). Modern clients call `server/discover`, select `2026-07-28`, and send sessionless requests containing matching protocol metadata and standard MCP routing headers. Do not send a legacy session ID on behalf of a modern client; the server deliberately keeps the two lifecycles separate.
 
 If a widget cannot create its Salesforce UI session, see [Troubleshooting](TROUBLESHOOTING.md) for the bootstrap error categories and configuration checks.
+
+## Local modified LO2 loader for Teams
+
+In **Setup ? Custom Metadata Types ? MCP App Bridge Core Configuration ? Manage Records ? Default**, enable **LO2 JS From Static Resource** when the host uses srcdoc and the stock LO2 loader passes a null URL origin. The bridge then loads the packaged **McpLo2Modified** static resource. Disabled (the default) keeps Salesforce's hosted latest loader. Start a fresh widget load after changing this setting.
+
+The local modified version pins LO2 2.2.5 and changes the two loAppOrigin assignments to use the valid effective window.origin. It preserves origin checks and does not support an opaque effective origin. Component loading was confirmed in the srcdoc reproduction; validate the packaged resource in Teams, including events and session behavior. Salesforce updates must be incorporated separately. See [local modified loader details](LO2-LOCAL-MODIFIED.md).
+
+The local static-resource request can redirect from My Domain to the package-specific Visualforce host (for example, `https://ORG--mcpapp.vf.force.com`). When the local loader is enabled, MCP resource metadata includes that exact host in `ui.csp.resourceDomains`, resolved with Salesforce DomainCreator. Both resources/list and resources/read share this policy. Start a fresh widget/resource load after upgrading so the host receives the updated CSP; an already-mounted iframe retains its old policy. A script-src rejection for that host indicates missing or cached resource CSP metadata, not an OAuth failure.
+
+The resource CSP also allows the org's exact files/content origin, resolved with `DomainCreator.getContentHostname()` (typically `https://ORG.file.force.com`), in resourceDomains and frameDomains. The loader checkbox is included in the Core Configuration page layout under Configuration Details. Existing subscriber layout customizations may require adding the field manually after upgrade.
