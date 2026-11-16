@@ -43,7 +43,7 @@ Salesforce does expose the `/.well-known/openid-configuration` endpoint which so
 
 ## Package Info
 
-**Managed Package v68.0 - 0.9** `/packaging/installPackage.apexp?p0=04tP3000002Hk3hIAC`
+**Managed Package v68.0 - 0.11** `/packaging/installPackage.apexp?p0=04tP3000002Ke1lIAC`
 
 ## Start here
 

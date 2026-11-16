@@ -209,7 +209,7 @@ private class McpRestEndpointTest {
         Assert.isTrue(json.contains('attributeName=name=&gt;name.replace') || json.contains('attributeName=name=>name.replace'),'Widget should translate public property names to Lightning Out attributes');
         Assert.isTrue(json.contains('queuedToolResults'),'Widget should retain inbound commands until the Lightning Out component is ready');
         Assert.isTrue(json.contains('appInfo:{name:\'mcpapp-bridge\',version:\'1.0.0\'}'),'Widget must use the MCP Apps initialization schema');
-        Assert.isTrue(json.contains('appCapabilities:{}'),'Widget must declare MCP Apps capabilities');
+        Assert.isTrue(json.contains('appCapabilities:{availableDisplayModes:[\'inline\',\'fullscreen\']}'),'Widget must declare inline and fullscreen MCP Apps capabilities');
         Assert.isFalse(json.contains('admin_friend_event'),'Generic host must not contain a component-specific event tool');
         Assert.isFalse(json.contains('adminfriendaction'),'Generic host must not contain component-specific DOM events');
         Assert.isTrue(json.contains('ui/notifications/size-changed'),'Widget should report requested height to its MCP host');

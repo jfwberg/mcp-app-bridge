@@ -14,9 +14,15 @@
     #resize-handle{height:14px;flex:0 0 14px;cursor:ns-resize;background:#f3f3f3;border-top:1px solid #ddd;position:relative}
     #resize-handle:after{content:"";position:absolute;left:50%;top:5px;transform:translateX(-50%);width:42px;height:4px;border-radius:2px;background:#747474}
     #resize-handle:focus-visible{outline:2px solid #0176d3;outline-offset:-2px}
+    #display-toggle{position:fixed;top:8px;right:8px;z-index:1000;width:30px;height:30px;display:grid;place-items:center;padding:6px;border:1px solid transparent;border-radius:5px;background:transparent;color:#999;cursor:pointer}
+    #display-toggle[hidden]{display:none}#display-toggle:hover,#display-toggle:focus-visible{background:#f5f5f5;border-color:#ddd;color:#555}#display-toggle:focus-visible{outline:2px solid #0176d3;outline-offset:2px}#display-toggle:disabled{cursor:wait;opacity:.5}
+    #display-toggle svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+    html[data-display-mode="fullscreen"],html[data-display-mode="fullscreen"] body{height:100%;min-height:0}
+    html[data-display-mode="fullscreen"] #resize-handle{display:none}
   </style>
 </head>
 <body>
+  <button id="display-toggle" type="button" aria-label="Expand widget" title="Expand widget" aria-pressed="false" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path id="display-icon" d="M6 2H2v4m8-4h4v4M2 10v4h4m8-4v4h-4"/></svg></button>
   <div id="status" role="status">Loading authenticated Salesforce interface...</div>
   <main id="mount" aria-label="Salesforce Lightning Out component"></main>
   <div id="resize-handle" role="separator" aria-label="Resize component height" aria-orientation="horizontal" aria-valuemin="260" aria-valuemax="1200" aria-valuenow="560" tabindex="0"></div>
@@ -30,6 +36,11 @@
     const detached=value=>JSON.parse(JSON.stringify(value));
     const request=(method,params)=>new Promise((resolve,reject)=>{const id=++sequence;const timeout=setTimeout(()=>{pending.delete(id);reject(new Error(method+' timed out.'));},15000);pending.set(id,{resolve,reject,timeout});parent.postMessage(detached({jsonrpc:'2.0',id,method,params}),'*');});
     const notify=(method,params)=>parent.postMessage(detached({jsonrpc:'2.0',method,params}),'*');
+    const displayToggle=document.getElementById('display-toggle'),displayIcon=document.getElementById('display-icon');
+    let hostContext={},displayRequestPending=false;
+    const updateDisplayContext=context=>{hostContext={...hostContext,...context};const fullscreen=hostContext.displayMode==='fullscreen',modes=hostContext.availableDisplayModes||[];displayToggle.hidden=!modes.includes(fullscreen?'inline':'fullscreen');displayToggle.disabled=displayRequestPending;const label=fullscreen?'Collapse widget':'Expand widget';displayToggle.setAttribute('aria-label',label);displayToggle.setAttribute('title',label);displayToggle.setAttribute('aria-pressed',String(fullscreen));displayIcon.setAttribute('d',fullscreen?'M2 6h4V2m4 0v4h4M6 14v-4H2m12 0h-4v4':'M6 2H2v4m8-4h4v4M2 10v4h4m8-4v4h-4');document.documentElement.setAttribute('data-display-mode',hostContext.displayMode||'inline');};
+    displayToggle.addEventListener('click',async()=>{const mode=hostContext.displayMode==='fullscreen'?'inline':'fullscreen';if(displayRequestPending||!(hostContext.availableDisplayModes||[]).includes(mode))return;displayRequestPending=true;displayToggle.disabled=true;try{const result=await request('ui/request-display-mode',{mode});updateDisplayContext({displayMode:result.mode});if(result.mode==='inline')setWidgetHeight(widgetHeight);}catch(error){displayToggle.setAttribute('title','Display mode could not be changed. Try again.');}finally{displayRequestPending=false;displayToggle.disabled=false;}});
+    addEventListener('message',event=>{if(event.source===parent&&event.data&&event.data.method==='ui/notifications/host-context-changed'){const previous=hostContext.displayMode;updateDisplayContext(event.data.params||{});if(previous==='fullscreen'&&hostContext.displayMode==='inline')setWidgetHeight(widgetHeight);}});
     const sendDiagnostic=(stage,outcome,message)=>request('tools/call',{name:'log_bridge_diagnostic',arguments:{configKey:CONFIG.configKey,loadCorrelationId,stage,outcome,...(message?{message:String(message).slice(0,255)}:{})}}).catch(()=>{});
     const diagnostic=(stage,outcome='SUCCEEDED',message)=>{if(diagnosticEnabled===null){queuedDiagnostics.push([stage,outcome,message]);return;}if(diagnosticEnabled)sendDiagnostic(stage,outcome,message);};
     const originDiagnostics=[];
@@ -58,7 +69,7 @@
     const toolResultFrom=value=>{if(!value||typeof value!=='object')return null;if(value.structuredContent)return value;return value.result?toolResultFrom(value.result):null;};
     const dispatchToolResult=params=>{const result=toolResultFrom(params&&params.result||params);if(!result)return;const content=result.structuredContent;if(!content)return;const appliesToComponent=!content.configKey||content.configKey===CONFIG.configKey;if(content.componentInputs&&appliesToComponent)observeInputs(content.componentInputs);if(!componentReady||!mountedComponent){if((content.mcpappCommand||content.componentInputs)&&appliesToComponent)queuedToolResults.push(result);return;}if(!appliesToComponent)return;if(content.componentInputs)applyComponentInputs(content.componentInputs);const command=content.mcpappCommand;if(!command)return;const mapping=inboundMappings.find(item=>item.key===command.mappingKey);if(!mapping)return;mountedComponent.dispatchEvent(new CustomEvent(mapping.eventName,{detail:JSON.stringify(detached(command.payload||{})),bubbles:true,composed:true}));};
     const start=async()=>{try{
-      await request('ui/initialize',{protocolVersion:'2026-01-26',appCapabilities:{},appInfo:{name:'mcpapp-bridge',version:'1.0.0'}});notify('ui/notifications/initialized',{});diagnostic('UI_INITIALIZED');
+      const initialized=await request('ui/initialize',{protocolVersion:'2026-01-26',appCapabilities:{availableDisplayModes:['inline','fullscreen']},appInfo:{name:'mcpapp-bridge',version:'1.0.0'}});updateDisplayContext(initialized.hostContext||{});notify('ui/notifications/initialized',{});diagnostic('UI_INITIALIZED');
       const bootstrapResult=await request('tools/call',{name:'bootstrap_lightning_out',arguments:{configKey:CONFIG.configKey,loadCorrelationId}}),bootstrap=bootstrapFrom(bootstrapResult);
       if(bootstrap&&bootstrap.error)throw new Error(bootstrap.error.message||'The authenticated Salesforce interface could not be created.');
       if(!bootstrap||!bootstrap.frontdoorUrl)throw new Error('A fresh Salesforce UI session was not returned.');
