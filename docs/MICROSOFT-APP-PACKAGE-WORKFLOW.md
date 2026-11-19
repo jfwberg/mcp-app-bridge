@@ -29,7 +29,7 @@ The current builder is `scripts/build_microsoft_app_package.cjs`:
 | UI tools | `tools` array and definitions |
 | OAuth vault reference | `MCP_OAUTH_VAULT_ID` environment variable |
 
-Record Creator and Record Viewer input schemas come from source custom metadata. Viewer resource URI also comes from metadata; Creator URI is pinned and checked against metadata. Admin Friend comes from the previously supplied EZ Form tool trace because its subscriber metadata is not in this repo. Callback schemas are pinned in the builder. This is a partial metadata-based builder, not automatic discovery of every deployed tool.
+Record Creator and Record Viewer input schemas come from source custom metadata. Viewer resource URI also comes from metadata; Creator URI is pinned and checked against metadata. Admin Friend comes from the previously supplied EZ Form tool trace because its subscriber metadata is not in this repo. FSC Process Demo comes from `scripts/metadata/fsc-process-demo.json`, a snapshot of the optional extension metadata with upstream commit provenance; refresh it from the extension metadata and verify against deployed `tools/list` when updating that package. Callback schemas are pinned in the builder. This is a partial metadata-based builder, not automatic discovery of every deployed tool.
 
 When adding or changing a tool, use its current deployed `tools/list` definition as the reference. Copy the exact name, input schema, description, and resource URI. Keep `_meta.ui.resourceUri` and `_meta["ui/resourceUri"]` identical. UI launch tools use `visibility: ["model", "app"]`; bootstrap, event, and diagnostic callbacks use `["app"]`.
 

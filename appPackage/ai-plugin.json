@@ -2,7 +2,7 @@
   "$schema": "https://developer.microsoft.com/json-schemas/copilot/plugin/v2.4/schema.json",
   "schema_version": "v2.4",
   "name_for_human": "MCP App Bridge",
-  "description_for_human": "Create and view Salesforce records and explore administration metadata.",
+  "description_for_human": "Create and view Salesforce records, explore metadata, and run FSC process demos.",
   "namespace": "MCPAppBridge",
   "functions": [
     {
@@ -16,6 +16,10 @@
     {
       "name": "open_mcp_admin_friend",
       "description": "Read-only Salesforce administration explorer with optional initial object selection and JSON action events."
+    },
+    {
+      "name": "open_fsc_process_demo",
+      "description": "Financial Services process demo with KYC onboarding and Loan Application workflows. Returns compliance decisions and loan underwriting results to the MCP chat window."
     },
     {
       "name": "bootstrap_lightning_out",
@@ -190,6 +194,61 @@
               ]
             },
             {
+              "name": "open_fsc_process_demo",
+              "title": "Open FSC Process Demo",
+              "description": "Financial Services process demo with KYC onboarding and Loan Application workflows. Returns compliance decisions and loan underwriting results to the MCP chat window.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "clientName": {
+                    "type": "string",
+                    "description": "Pre-fill the client name in KYC and Loan forms."
+                  },
+                  "clientId": {
+                    "type": "string",
+                    "description": "CRM client identifier shown in the card header."
+                  },
+                  "startDate": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Process start date (YYYY-MM-DD). Defaults to today."
+                  },
+                  "initialTab": {
+                    "type": "string",
+                    "enum": [
+                      "kyc",
+                      "loan",
+                      "flow"
+                    ],
+                    "description": "Tab to open on load.",
+                    "default": "kyc"
+                  },
+                  "loanAmount": {
+                    "type": "integer",
+                    "description": "Pre-fill loan amount in euros."
+                  }
+                }
+              },
+              "_meta": {
+                "ui": {
+                  "resourceUri": "ui://wt-fsc-process-demo/v1",
+                  "visibility": [
+                    "model",
+                    "app"
+                  ]
+                },
+                "ui/resourceUri": "ui://wt-fsc-process-demo/v1"
+              },
+              "securitySchemes": [
+                {
+                  "type": "oauth2",
+                  "scopes": [
+                    "api"
+                  ]
+                }
+              ]
+            },
+            {
               "name": "bootstrap_lightning_out",
               "title": "Create Lightning Out session",
               "description": "Create a fresh, single-use Salesforce Lightning Out session for the mounted app.",
@@ -314,6 +373,7 @@
         "open_demo_record_creator",
         "open_demo_record_viewer",
         "open_mcp_admin_friend",
+        "open_fsc_process_demo",
         "bootstrap_lightning_out",
         "bridge_event",
         "log_bridge_diagnostic"

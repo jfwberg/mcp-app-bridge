@@ -1,7 +1,5 @@
 # Salesforce MCP App Bridge
 
-**Teams srcdoc compatibility:** if Lightning Out fails with invalid target origin `null`, enable **LO2 JS From Static Resource** on the Default Core Configuration to use the local modified LO2 2.2.5 loader. It uses the inherited effective origin instead of the srcdoc URL origin. The option defaults off; the standalone reproduction passes, while packaged Teams validation is pending. See [diagnosis and setup](docs/TROUBLESHOOTING.md#teams-lightning-out-fails-with-invalid-target-origin-null).
-
 Salesforce MCP App Bridge is a managed-package MCP server that turns configured Lightning Web Components into authenticated MCP Apps and generated tools without adding component-specific code to the bridge.
 
 The current bridge supports four protocol revisions on one Apex REST endpoint:
@@ -22,6 +20,8 @@ The current bridge supports four protocol revisions on one Apex REST endpoint:
 
 The bridge remains client-neutral and follows MCP Apps conventions. A host must support MCP App HTML resources and permit the nested Salesforce frame required by Lightning Out 2.0.
 
+**Teams srcdoc compatibility:** if Lightning Out fails with invalid target origin `null`, enable **LO2 JS From Static Resource** on the Default Core Configuration to use the local modified LO2 2.2.5 loader. It uses the inherited effective origin instead of the srcdoc URL origin. The option defaults off; the standalone reproduction passes, while packaged Teams validation is pending. See [diagnosis and setup](docs/TROUBLESHOOTING.md#teams-lightning-out-fails-with-invalid-target-origin-null).
+
 ## Public routes
 
 ```text
@@ -39,7 +39,7 @@ https://{MY_DOMAIN}/services/oauth2/token
 ```
 
 Apex REST cannot own a domain-root `/.well-known/*` route. The Salesforce My Domain does not currently expose the `/.well-known/oauth-authorization-server` endpoint. Clients that solely rely on this resource will require an authentication proxy solution until Salesforce adds the `/.well-known` endpoint.
-Salesforce does expose the `/.well-known/openid-configuration` endpoint which some MCP clients can use for discovery, but this does not always happen in practice.
+Salesforce does expose the `/.well-known/openid-configuration` endpoint which some MCP clients can use for discovery, but this does not always happen in practice (Claude for example).
 
 ## Package Info
 
@@ -51,9 +51,13 @@ Salesforce does expose the `/.well-known/openid-configuration` endpoint which so
 2. Follow [Installation and org setup](docs/SETUP.md) to configure OAuth, JWT, allowed origins, and Lightning Out 2.0.
 3. Connect the client to the namespaced MCP endpoint above.
 4. Enable [diagnostic logging](docs/LOGGING.md) temporarily when validating a new client.
-5. Optionally enable the [record creator/viewer demo](docs/DEMO.md).
+5. Optionally enable the [record creator/viewer demo](docs/DEMO.md#demo-1-record-creator-and-viewer) or install the [FSC Process Demo](docs/DEMO.md#demo-2-optional-fsc-process-demo) for KYC, loan applications, and a screen flow.
 
 Packaged configuration is safe by default: the core record, demo tools, event mappings, and logging switch are disabled, and no org-specific OAuth identifier, certificate name, Lightning Out app ID, token, or URL is included.
+
+## Optional second demo: FSC processes
+
+The [FSC Process Demo](https://github.com/jfwberg/fsc-process-demo) extension adds KYC onboarding, loan application workflows, and the `KYC_Onboarding_Flow` screen flow. Install MCP App Bridge `0.11.0-1` first, then [FSC Process Demo `0.2.0-1`](https://login.salesforce.com/packaging/installPackage.apexp?p0=04tak000000vJCPAA2). Configure its Lightning Out app ID before launching `open_fsc_process_demo`. See [setup and sample prompts](docs/DEMO.md#demo-2-optional-fsc-process-demo). The [Microsoft appPackage](appPackage/README.md) includes this optional tool for Teams.
 
 ## Configuration model
 
@@ -68,7 +72,7 @@ Packaged configuration is safe by default: the core record, demo tools, event ma
 - [Architecture and security boundaries](docs/ARCHITECTURE.md)
 - [Client compatibility matrix](docs/COMPATIBILITY.md)
 - [Add and package your own LWC](docs/EXTENDING.md)
-- [Record creator demo](docs/DEMO.md)
+- [Demos: record creator/viewer and optional FSC processes](docs/DEMO.md)
 - [Troubleshooting](docs/TROUBLESHOOTING.md)
 - [Managed-package release checklist](docs/PACKAGING.md)
 

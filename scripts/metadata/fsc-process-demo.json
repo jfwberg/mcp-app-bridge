@@ -1,0 +1,41 @@
+{
+  "source": "https://github.com/jfwberg/fsc-process-demo",
+  "revision": "0a9c0e5077aac0dcabcd4f8e10c2791c3067834a",
+  "metadataFile": "force-app/main/default/customMetadata/mcpapp__MCP_App_Bridge_LO2_Config.fsc_process_demo.md-meta.xml",
+  "name": "open_fsc_process_demo",
+  "title": "Open FSC Process Demo",
+  "description": "Financial Services process demo with KYC onboarding and Loan Application workflows. Returns compliance decisions and loan underwriting results to the MCP chat window.",
+  "resourceUri": "ui://wt-fsc-process-demo/v1",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "clientName": {
+        "type": "string",
+        "description": "Pre-fill the client name in KYC and Loan forms."
+      },
+      "clientId": {
+        "type": "string",
+        "description": "CRM client identifier shown in the card header."
+      },
+      "startDate": {
+        "type": "string",
+        "format": "date",
+        "description": "Process start date (YYYY-MM-DD). Defaults to today."
+      },
+      "initialTab": {
+        "type": "string",
+        "enum": [
+          "kyc",
+          "loan",
+          "flow"
+        ],
+        "description": "Tab to open on load.",
+        "default": "kyc"
+      },
+      "loanAmount": {
+        "type": "integer",
+        "description": "Pre-fill loan amount in euros."
+      }
+    }
+  }
+}
