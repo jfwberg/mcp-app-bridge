@@ -16,7 +16,7 @@ Use the origin checkpoints in [Logging](LOGGING.md#browser-origin-investigation)
 
 ## Teams tool works but no UI resource is requested
 
-Use the Microsoft [appPackage integration](../appPackage/README.md). The Copilot Studio agent/connector route tested here discovers and invokes tools but does not render MCP Apps UI. The packaged Teams integration rendered a Salesforce LWC on 6 October 2026. Enable host developer mode with `-developer on` and inspect Actions and authentication errors. Do not infer runtime UI support from the discovery client's empty capabilities alone.
+**Microsoft update (23 November 2026):** the published Copilot Studio agent was verified rendering MCP Admin Friend and returning selected Salesforce record data to chat, including in Copilot in Teams. Add the MCP server as a tool in Copilot Studio and publish the agent; a separate declarative-agent appPackage is not required for this verified route. Preview displayed the UI but returned `MCP integration is unavailable for this agent.` Test the published agent before treating that preview error as a bridge failure. Salesforce ancestor trust, loader configuration, and third-party-cookie requirements still apply. If the published agent does not request a UI resource, check the opening tool metadata and MCP connection. Do not infer runtime UI support from a discovery-only trace.
 
 ## OAuth completes but Microsoft cannot finish the connection
 

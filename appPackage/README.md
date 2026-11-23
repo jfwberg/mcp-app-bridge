@@ -1,4 +1,6 @@
-# MCP App Bridge for Microsoft 365
+# Legacy Microsoft 365 declarative-agent package
+
+This package is optional historical material. Copilot in Teams now supports the bridge through a published Copilot Studio agent without building or uploading an appPackage. Follow [current setup](../docs/SETUP.md).
 
 **Loader and browser-session update (23 November 2026):** with **LO2 JS From Static Resource** enabled, the bridge embeds the modified LO2 2.2.5 loader in the authenticated MCP HTML response. It no longer fetches that loader through an unauthenticated Salesforce static-resource URL. Disabled (the default) uses Salesforce's hosted loader. Teams and Slack were confirmed working in clean Firefox sessions without a prior Salesforce login. Chrome Incognito initially failed; allowing third-party cookies for the host site immediately restored loading. MCP OAuth/refresh tokens and the framed Salesforce browser session are separate. See [diagnosis and setup](../docs/TROUBLESHOOTING.md#lightning-out-library-could-not-be-loaded).
 
@@ -6,7 +8,7 @@ For repeatable creation and updates, use the [appPackage workflow and reusable C
 
 This is a pinned declarative-agent package based on [Microsoft's employee-training sample](https://github.com/microsoft/mcp-interactiveUI-samples/tree/main/mcp-apps/employee-training/node/appPackage). The generated package currently uses the direct EZ Form Salesforce MCP endpoint; no Salesforce code deployment is required. The user confirmed Salesforce LWC rendering in Teams on 6 October 2026 after configuring proxy OAuth headers and Salesforce iframe trusted domains.
 
-**Current Microsoft limitation:** exposing an MCP server through a Copilot Studio agent/connector does not render MCP Apps UI in the tested route. Use this **appPackage** integration, which registers a declarative agent and RemoteMCPServer plugin. The packaged declarative agent is a different integration path from the agent/connector route.
+**Historical integration:** this package was required before the tested Copilot Studio route supported MCP Apps. The published Copilot Studio agent was verified on 23 November 2026 with Salesforce UI rendering and data returned to Copilot in Teams without this package. Use [current setup](../docs/SETUP.md) for that route; this directory is retained for optional declarative-agent deployments and maintenance.
 
 For proxy OAuth, use matching proxy authorization, token, and refresh endpoints in the Teams OAuth registration. The tested OAuth navigation routes needed `Cross-Origin-Opener-Policy: unsafe-none` to preserve popup communication. Salesforce trusted iframe domains needed `https://*.widget-renderer.usercontent.microsoft` (without `.com`) plus the cloud Microsoft ancestors. See [the confirmed Teams setup](../docs/COMPATIBILITY.md) for the observed ancestor chain. Ensure the registration Base URL matches the MCP endpoint in the package you actually install.
 

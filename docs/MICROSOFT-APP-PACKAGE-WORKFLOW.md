@@ -1,8 +1,8 @@
-# Create or update a Microsoft appPackage
+# Legacy Microsoft appPackage maintenance
 
-**Salesforce prerequisite for Teams srcdoc hosts:** when the hosted loader fails on a null origin, enable **LO2 JS From Static Resource** after installing the updated bridge. The modified loader is embedded in authenticated MCP HTML; no anonymous static-resource fetch is required. Clean Firefox sessions were confirmed on 23 November 2026. Chrome required third-party cookies for the host site. These are Salesforce/browser settings, not manifest changes. See [troubleshooting](TROUBLESHOOTING.md#lightning-out-library-could-not-be-loaded).
+This is an optional historical workflow for maintaining the packaged declarative-agent integration. A separate appPackage is not required for the published Copilot Studio / Copilot in Teams route verified on 23 November 2026. Use [current setup](SETUP.md) for that route.
 
-Use this workflow for the packaged Microsoft Teams/Microsoft 365 integration. The Copilot Studio agent/connector route tested here does not render MCP Apps UI.
+**Salesforce configuration for Teams srcdoc hosts:** when the hosted loader fails on a null origin, enable **LO2 JS From Static Resource** after installing the updated bridge. The modified loader is embedded in authenticated MCP HTML; no anonymous static-resource fetch is required. Clean Firefox sessions were confirmed on 23 November 2026. Chrome required third-party cookies for the host site. These are Salesforce/browser settings, not manifest changes. See [troubleshooting](TROUBLESHOOTING.md#lightning-out-library-could-not-be-loaded).
 
 ## Rebuild the existing EZ Form package
 

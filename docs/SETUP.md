@@ -1,6 +1,6 @@
 # Installation and org setup
 
-For Microsoft Teams, use the [Microsoft appPackage setup](../appPackage/README.md). At this stage, the tested Copilot Studio agent/connector route exposes tools but does not render MCP Apps UI; a packaged declarative-agent integration is required. Teams LWC rendering was confirmed on 6 October 2026. Configure both OAuth popup headers and Salesforce trusted iframe domains as described in [client compatibility](COMPATIBILITY.md). For the subsequently diagnosed srcdoc origin failure, see [Local modified LO2 loader for Teams](#local-modified-lo2-loader-for-teams); its checkbox defaults off; clean-session validation and Chrome cookie requirements are recorded in [client compatibility](COMPATIBILITY.md).
+**Microsoft update (23 November 2026):** the published Copilot Studio agent was verified rendering MCP Admin Friend and returning selected Salesforce record data to chat, including in Copilot in Teams. Add the MCP server as a tool in Copilot Studio and publish the agent; a separate declarative-agent appPackage is not required for this verified route. Preview displayed the UI but returned `MCP integration is unavailable for this agent.` Test the published agent before treating that preview error as a bridge failure. Salesforce ancestor trust, loader configuration, and third-party-cookie requirements still apply. See [client compatibility](COMPATIBILITY.md) and [Local modified LO2 loader for Teams](#local-modified-lo2-loader-for-teams).
 
 ## 1. Assign access
 

@@ -68,7 +68,7 @@ The separate [FSC Process Demo package](https://github.com/jfwberg/fsc-process-d
 3. Create or reuse a Lightning Out 2.0 app containing `wt/fscProcessDemo`. Set its real 18-character app ID on **MCP App Bridge Lightning Out 2.0 ? fsc_process_demo**. The extension ships enabled with placeholder `000000000000000000`; replace that value before use.
 4. Confirm the configuration uses component `wt-fsc-process-demo` and resource URI `ui://wt/fsc-process-demo/v1/index.html`. Keep event mappings `fsc_kyc_completed` and `fsc_loan_decision` enabled and linked to `fsc_process_demo`.
 5. Ensure the user can run the screen flow, then reconnect the MCP client. Confirm `tools/list` includes `open_fsc_process_demo`.
-6. For Teams, rebuild and install the [Microsoft appPackage](../appPackage/README.md). Its pinned tool metadata does not install or configure the Salesforce extension.
+6. For Copilot in Teams, refresh MCP tool discovery in Copilot Studio and publish the agent with the demo tool available. No separate appPackage is required for the verified route. Only if maintaining the [legacy declarative-agent package](../appPackage/README.md), rebuild its pinned tool metadata separately; it does not install or configure the Salesforce extension.
 
 ### Sample prompts
 

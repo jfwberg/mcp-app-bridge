@@ -5,7 +5,7 @@ Salesforce MCP App Bridge is a managed-package MCP server that turns configured 
 The current bridge supports four protocol revisions on one Apex REST endpoint:
 
 - MCP `2024-11-05`, `2025-06-18`, and `2025-11-25`: stateless-compatible `initialize` flows, with backward-compatible handling of existing session-bearing requests.
-- Microsoft (MSFT) clients have been observed using `2024-11-05`; this revision is supported over the bridge's existing HTTP response flow. Salesforce LWC rendering in Teams was confirmed on 6 October 2026 using an [appPackage](appPackage/README.md). At this stage, exposing the MCP server through a Copilot Studio agent does not render MCP Apps UI; use the packaged declarative-agent integration. See [client compatibility](docs/COMPATIBILITY.md).
+- Microsoft clients have been observed using `2024-11-05`.
 - MCP `2026-07-28`: sessionless `server/discover` flow with per-request metadata and standard routing headers.
 
 ## What it provides
@@ -18,7 +18,7 @@ The current bridge supports four protocol revisions on one Apex REST endpoint:
 - Public custom metadata types that extension packages can populate.
 - Two disabled reference LWCs demonstrating record creation and viewing.
 
-The bridge remains client-neutral and follows MCP Apps conventions. A host must support MCP App HTML resources and permit the nested Salesforce frame required by Lightning Out 2.0.
+The bridge remains client-neutral and follows MCP Apps conventions. A host must support MCP App HTML resources and permit the nested Salesforce frame required by Lightning Out 2.0. MCP Apps now works directly in Copilot in Teams through a published Copilot Studio agent. See [client compatibility](docs/COMPATIBILITY.md) for verified hosts and preview limitations.
 
 **Loader and browser-session update (23 November 2026):** with **LO2 JS From Static Resource** enabled, the bridge embeds the modified LO2 2.2.5 loader in the authenticated MCP HTML response. It no longer fetches that loader through an unauthenticated Salesforce static-resource URL. Disabled (the default) uses Salesforce's hosted loader. Teams and Slack were confirmed working in clean Firefox sessions without a prior Salesforce login. Chrome Incognito initially failed; allowing third-party cookies for the host site immediately restored loading. MCP OAuth/refresh tokens and the framed Salesforce browser session are separate. See [diagnosis and setup](docs/TROUBLESHOOTING.md#lightning-out-library-could-not-be-loaded).
 
@@ -51,7 +51,7 @@ Salesforce does expose the `/.well-known/openid-configuration` endpoint which so
 
 1. Install the package and assign the **MCP App Bridge** permission set to the integration user.
 2. Follow [Installation and org setup](docs/SETUP.md) to configure OAuth, JWT, allowed origins, and Lightning Out 2.0.
-3. Connect the client to the namespaced MCP endpoint above.
+3. Connect the client to the namespaced MCP endpoint above. For Microsoft, add the MCP server as a tool in Copilot Studio and publish the agent. No separate appPackage is needed for the verified Copilot in Teams route; see [compatibility and preview limitations](docs/COMPATIBILITY.md).
 4. Enable [diagnostic logging](docs/LOGGING.md) temporarily when validating a new client.
 5. Optionally enable the [record creator/viewer demo](docs/DEMO.md#demo-1-record-creator-and-viewer) or install the [FSC Process Demo](docs/DEMO.md#demo-2-optional-fsc-process-demo) for KYC, loan applications, and a screen flow.
 
@@ -59,7 +59,7 @@ Packaged configuration is safe by default: the core record, demo tools, event ma
 
 ## Optional second demo: FSC processes
 
-The [FSC Process Demo](https://github.com/jfwberg/fsc-process-demo) extension adds KYC onboarding, loan application workflows, and the `KYC_Onboarding_Flow` screen flow. Install MCP App Bridge `0.11.0-1` first, then [FSC Process Demo `0.2.0-1`](https://login.salesforce.com/packaging/installPackage.apexp?p0=04tak000000vJCPAA2). Configure its Lightning Out app ID before launching `open_fsc_process_demo`. See [setup and sample prompts](docs/DEMO.md#demo-2-optional-fsc-process-demo). The [Microsoft appPackage](appPackage/README.md) includes this optional tool for Teams.
+The [FSC Process Demo](https://github.com/jfwberg/fsc-process-demo) extension adds KYC onboarding, loan application workflows, and the `KYC_Onboarding_Flow` screen flow. Install MCP App Bridge `0.11.0-1` first, then [FSC Process Demo `0.2.0-1`](https://login.salesforce.com/packaging/installPackage.apexp?p0=04tak000000vJCPAA2). Configure its Lightning Out app ID before launching `open_fsc_process_demo`. See [setup and sample prompts](docs/DEMO.md#demo-2-optional-fsc-process-demo).
 
 ## Configuration model
 
@@ -102,3 +102,7 @@ Source metadata is namespace-neutral. Salesforce exposes installed components wi
 ## Known host limitation
 
 A rendered widget is an isolated UI instance. Model-invoked UI tools normally create a new widget; MCP Apps does not define a portable mechanism for addressing an arbitrary older widget. Hosts whose Content Security Policy blocks iframe-inside-iframe rendering cannot display Lightning Out even when authentication and frontdoor generation succeed. See the [client compatibility matrix](docs/COMPATIBILITY.md) for verified host behavior and [Troubleshooting](docs/TROUBLESHOOTING.md#salesforce-frame-is-blocked-by-the-mcp-client) for the distinct iframe failure modes.
+
+### Historical note: Microsoft appPackage
+
+Before the tested Copilot Studio route supported MCP Apps in Copilot in Teams, a separately packaged declarative agent with a RemoteMCPServer plugin was required. That route first rendered a Salesforce LWC on 6 October 2026. It is retained as an optional historical reference, not a setup requirement for the published-agent route verified on 23 November 2026. See the [legacy appPackage](appPackage/README.md) and [package maintenance workflow](docs/MICROSOFT-APP-PACKAGE-WORKFLOW.md).
