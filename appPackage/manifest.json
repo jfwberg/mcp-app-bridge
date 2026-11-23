@@ -1,7 +1,7 @@
 {
   "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.24/MicrosoftTeams.schema.json",
   "manifestVersion": "1.24",
-  "version": "1.0.4",
+  "version": "1.0.7",
   "id": "6fd0c816-4c64-4828-8a4e-5a76a3d8d91a",
   "developer": {
     "name": "EZ Form",
@@ -11,7 +11,7 @@
   },
   "name": {
     "short": "MCP App Bridge",
-    "full": "MCP App Bridge"
+    "full": "MCP App Bridge for EZ Form"
   },
   "description": {
     "short": "Salesforce records, metadata, and FSC process demos.",

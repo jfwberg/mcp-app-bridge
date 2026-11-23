@@ -5,37 +5,12 @@
   "name": "open_fsc_process_demo",
   "title": "Open FSC Process Demo",
   "description": "Financial Services process demo with KYC onboarding and Loan Application workflows. Returns compliance decisions and loan underwriting results to the MCP chat window.",
-  "resourceUri": "ui://wt-fsc-process-demo/v1",
+  "resourceUri": "ui://wt/fsc-process-demo/v1/index.html",
   "inputSchema": {
     "type": "object",
-    "properties": {
-      "clientName": {
-        "type": "string",
-        "description": "Pre-fill the client name in KYC and Loan forms."
-      },
-      "clientId": {
-        "type": "string",
-        "description": "CRM client identifier shown in the card header."
-      },
-      "startDate": {
-        "type": "string",
-        "format": "date",
-        "description": "Process start date (YYYY-MM-DD). Defaults to today."
-      },
-      "initialTab": {
-        "type": "string",
-        "enum": [
-          "kyc",
-          "loan",
-          "flow"
-        ],
-        "description": "Tab to open on load.",
-        "default": "kyc"
-      },
-      "loanAmount": {
-        "type": "integer",
-        "description": "Pre-fill loan amount in euros."
-      }
-    }
-  }
+    "properties": {},
+    "additionalProperties": false
+  },
+  "resourceUriNote": "Local override requested for Teams. Set the installed Salesforce fsc_process_demo Resource_Uri__c to this exact URI; upstream metadata at the recorded revision uses ui://wt-fsc-process-demo/v1.",
+  "inputSchemaNote": "Local Teams diagnostic override: launch FSC without parameters; upstream schema at the recorded revision exposes five optional properties."
 }

@@ -12,7 +12,10 @@ public with sharing class McpResourceRegistry {
             assetSizes.put(asset.Name,asset.BodyLength);
         }
         for(McpLightningOutConfig config:configs){
-            resources.add(new Map<String,Object>{'uri'=>config.resourceUri,'name'=>config.key,'title'=>config.displayName,'description'=>config.description,'mimeType'=>'text/html;profile=mcp-app','size'=>assetSizes.get(config.staticResourceName),'_meta'=>resourceMetadata(orgOrigin,lightningOrigin,config.description)});
+            Map<String,Object> resource=new Map<String,Object>{'uri'=>config.resourceUri,'name'=>config.key,'title'=>config.displayName,'description'=>config.description,'mimeType'=>'text/html;profile=mcp-app','size'=>assetSizes.get(config.staticResourceName),'_meta'=>resourceMetadata(orgOrigin,lightningOrigin,config.description)};
+            // Embedded response size differs from the template's static-resource size.
+            if(McpBridgeCoreConfig.get().lo2JsFromStaticResource) resource.remove('size');
+            resources.add(resource);
         }
         return new Map<String,Object>{'resources'=>resources};
     }
@@ -28,8 +31,23 @@ public with sharing class McpResourceRegistry {
         String lightningOrigin=orgOrigin.replace('.my.salesforce.com','.lightning.force.com');
         String html=asset.Body.toString()
             .replace('__MCPAPP_CONFIG_KEY__',JSON.serialize(lightningConfig.key));
+        html=embedLoader(html);
         Map<String,Object> metadata=resourceMetadata(orgOrigin,lightningOrigin,lightningConfig.description);
         return new Map<String,Object>{'contents'=>new List<Object>{new Map<String,Object>{'uri'=>uri,'mimeType'=>'text/html;profile=mcp-app','text'=>html,'_meta'=>metadata}}};
+    }
+
+    // Execute the packaged loader after bootstrap, without an unauthenticated browser fetch.
+    @TestVisible private static String embedLoader(String html){
+        String marker='/*__MCPAPP_EMBEDDED_LOADER__*/';
+        if(!html.contains(marker)) return html;
+        String loader='';
+        if(McpBridgeCoreConfig.get().lo2JsFromStaticResource){
+            List<StaticResource> assets=[SELECT Body FROM StaticResource WHERE Name='McpLo2Modified' WITH USER_MODE LIMIT 1];
+            if(assets.isEmpty()) throw new McpProtocolException(-32603,503,'Configured Lightning Out loader is unavailable.');
+            // Prevent resource text from terminating the containing HTML script element.
+            loader=assets[0].Body.toString().replaceAll('(?i)</script','<\\/script')+'\nreturn true;\n';
+        }
+        return html.replace(marker,loader);
     }
 
     @TestVisible private static Map<String,Object> resourceMetadata(String orgOrigin,String lightningOrigin,String description){

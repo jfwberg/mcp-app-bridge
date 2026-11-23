@@ -20,7 +20,9 @@ The current bridge supports four protocol revisions on one Apex REST endpoint:
 
 The bridge remains client-neutral and follows MCP Apps conventions. A host must support MCP App HTML resources and permit the nested Salesforce frame required by Lightning Out 2.0.
 
-**Teams srcdoc compatibility:** if Lightning Out fails with invalid target origin `null`, enable **LO2 JS From Static Resource** on the Default Core Configuration to use the local modified LO2 2.2.5 loader. It uses the inherited effective origin instead of the srcdoc URL origin. The option defaults off; the standalone reproduction passes, while packaged Teams validation is pending. See [diagnosis and setup](docs/TROUBLESHOOTING.md#teams-lightning-out-fails-with-invalid-target-origin-null).
+**Loader and browser-session update (23 November 2026):** with **LO2 JS From Static Resource** enabled, the bridge embeds the modified LO2 2.2.5 loader in the authenticated MCP HTML response. It no longer fetches that loader through an unauthenticated Salesforce static-resource URL. Disabled (the default) uses Salesforce's hosted loader. Teams and Slack were confirmed working in clean Firefox sessions without a prior Salesforce login. Chrome Incognito initially failed; allowing third-party cookies for the host site immediately restored loading. MCP OAuth/refresh tokens and the framed Salesforce browser session are separate. See [diagnosis and setup](docs/TROUBLESHOOTING.md#lightning-out-library-could-not-be-loaded).
+
+For Slack demos, prefer the normal Salesforce-hosted loader where it works (checkbox off). The loader setting is org-wide and affects new widgets across clients. Keep the Teams workaround until the hosted loader has been verified in clean sessions after a Salesforce update.
 
 ## Public routes
 
@@ -43,7 +45,7 @@ Salesforce does expose the `/.well-known/openid-configuration` endpoint which so
 
 ## Package Info
 
-**Managed Package v68.0 - 0.11** `/packaging/installPackage.apexp?p0=04tP3000002Ke1lIAC`
+**Managed Package v68.0 - 0.13** `/packaging/installPackage.apexp?p0=04tP3000002LdrdIAC`
 
 ## Start here
 

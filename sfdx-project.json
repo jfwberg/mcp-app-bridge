@@ -1,8 +1,8 @@
 {
   "packageDirectories": [
     {
-      "versionName": "v68.0 - 0.11",
-      "versionNumber": "0.11.0.NEXT",
+      "versionName": "v68.0 - 0.13",
+      "versionNumber": "0.13.0.NEXT",
       "path": "force-app",
       "default": true,
       "package": "MCP App Bridge",
@@ -35,6 +35,8 @@
     "MCP App Bridge@0.8.0-1": "04tP3000002HjcHIAS",
     "MCP App Bridge@0.9.0-1": "04tP3000002Hk3hIAC",
     "MCP App Bridge@0.10.0-1": "04tP3000002Ke09IAC",
-    "MCP App Bridge@0.11.0-1": "04tP3000002Ke1lIAC"
+    "MCP App Bridge@0.11.0-1": "04tP3000002Ke1lIAC",
+    "MCP App Bridge@0.12.0-1": "04tP3000002LdWfIAK",
+    "MCP App Bridge@0.13.0-1": "04tP3000002LdrdIAC"
   }
 }

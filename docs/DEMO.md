@@ -66,7 +66,7 @@ The separate [FSC Process Demo package](https://github.com/jfwberg/fsc-process-d
 1. Install [MCP App Bridge 0.11.0-1](https://login.salesforce.com/packaging/installPackage.apexp?p0=04tP3000002Ke1lIAC) and complete the [bridge setup](SETUP.md), including the integration user's permission set.
 2. Install [FSC Process Demo 0.2.0-1](https://login.salesforce.com/packaging/installPackage.apexp?p0=04tak000000vJCPAA2).
 3. Create or reuse a Lightning Out 2.0 app containing `wt/fscProcessDemo`. Set its real 18-character app ID on **MCP App Bridge Lightning Out 2.0 ? fsc_process_demo**. The extension ships enabled with placeholder `000000000000000000`; replace that value before use.
-4. Confirm the configuration uses component `wt-fsc-process-demo` and resource URI `ui://wt-fsc-process-demo/v1`. Keep event mappings `fsc_kyc_completed` and `fsc_loan_decision` enabled and linked to `fsc_process_demo`.
+4. Confirm the configuration uses component `wt-fsc-process-demo` and resource URI `ui://wt/fsc-process-demo/v1/index.html`. Keep event mappings `fsc_kyc_completed` and `fsc_loan_decision` enabled and linked to `fsc_process_demo`.
 5. Ensure the user can run the screen flow, then reconnect the MCP client. Confirm `tools/list` includes `open_fsc_process_demo`.
 6. For Teams, rebuild and install the [Microsoft appPackage](../appPackage/README.md). Its pinned tool metadata does not install or configure the Salesforce extension.
 
@@ -93,5 +93,7 @@ The package metadata exposes `clientName`, `clientId`, `startDate` (YYYY-MM-DD; 
 ### Expected results
 
 Complete a workflow with sample data. KYC and Flow completion emit `kyc_completed`; loan completion emits `loan_decision`. The configured bridge mappings send the results to chat for a summary and next steps. Verify the resource read, Lightning Out bootstrap, and returned event in Teams. These are demonstration compliance and underwriting outcomes.
+
+The resource URI above is a local Teams override and must also be set in the installed Salesforce configuration; upstream metadata uses `ui://wt-fsc-process-demo/v1`.
 
 The Teams metadata snapshot is pinned to upstream commit `0a9c0e5077aac0dcabcd4f8e10c2791c3067834a`; check the extension repository for later package releases and schema changes.

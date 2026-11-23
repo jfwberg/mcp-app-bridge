@@ -1,6 +1,6 @@
 # Installation and org setup
 
-For Microsoft Teams, use the [Microsoft appPackage setup](../appPackage/README.md). At this stage, the tested Copilot Studio agent/connector route exposes tools but does not render MCP Apps UI; a packaged declarative-agent integration is required. Teams LWC rendering was confirmed on 6 October 2026. Configure both OAuth popup headers and Salesforce trusted iframe domains as described in [client compatibility](COMPATIBILITY.md). For the subsequently diagnosed srcdoc origin failure, see [Local modified LO2 loader for Teams](#local-modified-lo2-loader-for-teams); its checkbox defaults off, the standalone reproduction passes, and packaged Teams validation is pending.
+For Microsoft Teams, use the [Microsoft appPackage setup](../appPackage/README.md). At this stage, the tested Copilot Studio agent/connector route exposes tools but does not render MCP Apps UI; a packaged declarative-agent integration is required. Teams LWC rendering was confirmed on 6 October 2026. Configure both OAuth popup headers and Salesforce trusted iframe domains as described in [client compatibility](COMPATIBILITY.md). For the subsequently diagnosed srcdoc origin failure, see [Local modified LO2 loader for Teams](#local-modified-lo2-loader-for-teams); its checkbox defaults off; clean-session validation and Chrome cookie requirements are recorded in [client compatibility](COMPATIBILITY.md).
 
 ## 1. Assign access
 
@@ -79,10 +79,16 @@ If a widget cannot create its Salesforce UI session, see [Troubleshooting](TROUB
 
 ## Local modified LO2 loader for Teams
 
-In **Setup ? Custom Metadata Types ? MCP App Bridge Core Configuration ? Manage Records ? Default**, enable **LO2 JS From Static Resource** when the host uses srcdoc and the stock LO2 loader passes a null URL origin. The bridge then loads the packaged **McpLo2Modified** static resource. Disabled (the default) keeps Salesforce's hosted latest loader. Start a fresh widget load after changing this setting.
+In **Setup ? Custom Metadata Types ? MCP App Bridge Core Configuration ? Manage Records ? Default**, enable **LO2 JS From Static Resource** when the host uses srcdoc and the stock LO2 loader passes a null URL origin. The authenticated `resources/read` response then embeds the packaged **McpLo2Modified** JavaScript; the browser does not fetch its static-resource URL. Disabled (the default) keeps Salesforce's hosted latest loader. Start a fresh widget load after changing this setting.
 
-The local modified version pins LO2 2.2.5 and changes the two loAppOrigin assignments to use the valid effective window.origin. It preserves origin checks and does not support an opaque effective origin. Component loading was confirmed in the srcdoc reproduction; validate the packaged resource in Teams, including events and session behavior. Salesforce updates must be incorporated separately. See [local modified loader details](LO2-LOCAL-MODIFIED.md).
+The local modified version pins LO2 2.2.5 and changes the two loAppOrigin assignments to use the valid effective window.origin. It preserves origin checks and does not support an opaque effective origin. Teams and Slack loading was confirmed in clean Firefox sessions on 23 November 2026. Chrome Incognito required third-party cookies for the host site; validate events and session behavior in your environment. Salesforce updates must be incorporated separately. See [local modified loader details](LO2-LOCAL-MODIFIED.md).
 
-The local static-resource request can redirect from My Domain to the package-specific Visualforce host (for example, `https://ORG--mcpapp.vf.force.com`). When the local loader is enabled, MCP resource metadata includes that exact host in `ui.csp.resourceDomains`, resolved with Salesforce DomainCreator. Both resources/list and resources/read share this policy. Start a fresh widget/resource load after upgrading so the host receives the updated CSP; an already-mounted iframe retains its old policy. A script-src rejection for that host indicates missing or cached resource CSP metadata, not an OAuth failure.
+The embedded-loader path needs no public Salesforce Site, anonymous static-resource URL, or additional Visualforce domain for loader delivery. Existing CSP allowances remain for compatibility; authentication and component frames still need the configured Salesforce and host domains.
 
 The resource CSP also allows the org's exact files/content origin, resolved with `DomainCreator.getContentHostname()` (typically `https://ORG.file.force.com`), in resourceDomains and frameDomains. The loader checkbox is included in the Core Configuration page layout under Configuration Details. Existing subscriber layout customizations may require adding the field manually after upgrade.
+
+## Browser cookies and normal Slack demos
+
+Salesforce authentication inside the client frame is separate from MCP OAuth and refresh tokens. Chrome blocks third-party cookies in Incognito by default. In the tested setup, a site-specific third-party-cookie allowance restored loading immediately. Use the host page's cookie control, then start a fresh widget for a fresh single-use frontdoor URL. Managed browser policies may restrict this setting. See [Chrome cookie settings](https://support.google.com/chrome/answer/95647?hl=en).
+
+For Slack demos, use Salesforce's normal hosted loader where it works: leave **LO2 JS From Static Resource** disabled. This org-wide setting affects new widgets across clients; enable it when the Teams srcdoc origin workaround is needed.

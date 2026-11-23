@@ -1,6 +1,6 @@
 # MCP App Bridge for Microsoft 365
 
-**Teams srcdoc loader fix (26 October 2026):** after installing a bridge version containing `McpLo2Modified`, optionally enable **LO2 JS From Static Resource** on **MCP App Bridge Core Configuration ? Default**. The local modified LO2 2.2.5 loader uses the effective origin because Teams' inner srcdoc document has a null URL origin. Disabled retains Salesforce's hosted latest loader. This is a Salesforce-side setting, not an app manifest or OAuth registration option. The standalone reproduction succeeds; packaged Teams validation is pending. See [details and rollback](../docs/TROUBLESHOOTING.md#teams-lightning-out-fails-with-invalid-target-origin-null).
+**Loader and browser-session update (23 November 2026):** with **LO2 JS From Static Resource** enabled, the bridge embeds the modified LO2 2.2.5 loader in the authenticated MCP HTML response. It no longer fetches that loader through an unauthenticated Salesforce static-resource URL. Disabled (the default) uses Salesforce's hosted loader. Teams and Slack were confirmed working in clean Firefox sessions without a prior Salesforce login. Chrome Incognito initially failed; allowing third-party cookies for the host site immediately restored loading. MCP OAuth/refresh tokens and the framed Salesforce browser session are separate. See [diagnosis and setup](../docs/TROUBLESHOOTING.md#lightning-out-library-could-not-be-loaded).
 
 For repeatable creation and updates, use the [appPackage workflow and reusable Codex prompt](../docs/MICROSOFT-APP-PACKAGE-WORKFLOW.md).
 
@@ -14,7 +14,9 @@ The package exposes four UI tools: `open_demo_record_creator`, `open_demo_record
 
 ## Optional FSC Process Demo
 
-Package version **1.0.4** adds `open_fsc_process_demo` with resource URI `ui://wt-fsc-process-demo/v1` in both nested and flat UI metadata, plus an onboarding conversation starter. Install and configure the [optional Salesforce extension](../docs/DEMO.md#demo-2-optional-fsc-process-demo) on the same org before using it. Its five inputs are `clientName`, `clientId`, `startDate`, `initialTab` (`kyc`, `loan`, `flow`), and integer `loanAmount` in euros. The two outbound event mappings use the existing `bridge_event` callback; they do not require extra model tools.
+Package version **1.0.7** includes `open_fsc_process_demo` with resource URI `ui://wt/fsc-process-demo/v1/index.html` in both nested and flat UI metadata, plus an onboarding conversation starter. Install and configure the [optional Salesforce extension](../docs/DEMO.md#demo-2-optional-fsc-process-demo) on the same org before using it. For this diagnostic version, FSC accepts no input parameters; select the tab and enter details in the app. The pinned input schema intentionally overrides the upstream five optional inputs. The two outbound event mappings use the existing `bridge_event` callback; they do not require extra model tools.
+
+The FSC URI is a local override; set the installed Salesforce `fsc_process_demo` Resource URI to `ui://wt/fsc-process-demo/v1/index.html` as well. Upstream metadata uses `ui://wt-fsc-process-demo/v1`.
 
 The builder reads the pinned upstream metadata snapshot in `scripts/metadata/fsc-process-demo.json`, which records its source commit. Refresh that snapshot when the extension schema or resource URI changes and compare it with the deployed `tools/list`.
 
@@ -25,7 +27,7 @@ Follow [Microsoft's OAuth instructions](https://learn.microsoft.com/en-us/micros
 | Setting | Value |
 | --- | --- |
 | Name | EZ Form Salesforce MCP |
-| Base URL | Copy `runtimes[0].spec.url` from `ai-plugin.json` (`https://ezform-dev-ed.my.salesforce.com/services/apexrest/mcpapp/mcp`) |
+| Base URL | Copy the direct Salesforce endpoint from `runtimes[0].spec.url` in `ai-plugin.json` |
 | Authorization endpoint | `https://ezform-dev-ed.my.salesforce.com/services/oauth2/authorize` |
 | Token and refresh endpoints | `https://ezform-dev-ed.my.salesforce.com/services/oauth2/token` |
 | Client ID / secret | Existing Salesforce OAuth application's consumer key / secret; enter these in the portal only |

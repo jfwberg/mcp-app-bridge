@@ -1,6 +1,6 @@
 # Client compatibility
 
-**Teams update (26 October 2026):** a subsequent srcdoc origin failure was reproduced despite `allow-same-origin` being present. The opt-in **LO2 JS From Static Resource** setting selects the local modified LO2 2.2.5 loader, which uses the valid effective `window.origin` instead of `location.origin` (`"null"` for srcdoc). It defaults off. Component loading succeeds in the standalone reproduction; the updated managed package in Teams still needs live validation. The earlier 6 October success remains a historical observation. See [diagnosis, activation, and rollback](TROUBLESHOOTING.md#teams-lightning-out-fails-with-invalid-target-origin-null).
+**Loader and browser-session update (23 November 2026):** with **LO2 JS From Static Resource** enabled, the bridge embeds the modified LO2 2.2.5 loader in the authenticated MCP HTML response. It no longer fetches that loader through an unauthenticated Salesforce static-resource URL. Disabled (the default) uses Salesforce's hosted loader. Teams and Slack were confirmed working in clean Firefox sessions without a prior Salesforce login. Chrome Incognito initially failed; allowing third-party cookies for the host site immediately restored loading. MCP OAuth/refresh tokens and the framed Salesforce browser session are separate. See [diagnosis and setup](TROUBLESHOOTING.md#lightning-out-library-could-not-be-loaded).
 
 This page records observed interoperability results for MCP App Bridge. It distinguishes MCP transport success from UI-host framing restrictions: a client can successfully discover and call tools while still refusing to render the nested Salesforce iframe.
 
@@ -15,7 +15,7 @@ This page records observed interoperability results for MCP App Bridge. It disti
 | Claude | Legacy MCP initialize/tool flow | Legacy-compatible transport | Discovery, tool invocation, and valid frontdoor authentication verified. Note: OAuth requires a token proxy due to strict OAuth 2.1 implementation | The observed host CSP does not permit the nested Salesforce iframe; this is not an MCP App Bridge failure, No workaround verified in this project |
 | Microsoft Copilot Studio (`MicrosoftCopilotStudio-AgenticLoop/1.0`) | Observed `2024-11-05` using `initialize`; headerless `tools/call` | Legacy completed POST/SSE response profile | Admin Friend invocation returned HTTP 200, `isError: false`, and component input data | No UI in the tested agent/connector route; no subsequent resources/read observed |
 
-| Microsoft Teams (packaged declarative agent) | RemoteMCPServer plugin with pinned tools; runtime protocol revision not captured separately | Packaged MCP Apps integration | OAuth and widget bootstrap completed in the tested setup | Salesforce LWC rendering confirmed on 6 October 2026; individual tool/action acceptance tests not all recorded |
+| Microsoft Teams (packaged declarative agent) | RemoteMCPServer plugin with pinned tools; runtime protocol revision not captured separately | Packaged MCP Apps integration | OAuth and widget bootstrap completed in the tested setup | Clean Firefox sessions confirmed on 23 November 2026 with embedded loader; Chrome required third-party cookies for the host site |
 
 These results describe the tested host versions and can change when a host updates its MCP implementation or CSP.
 
@@ -80,3 +80,11 @@ For Microsoft 365/Copilot or another new client, capture the following without i
 - browser console CSP errors, the effective `frame-src` and `frame-ancestors` directives, and the ancestor origin chain.
 
 If negotiation succeeds but no discovery request follows, compare the response framing with the profiles above. If tool invocation and frontdoor generation succeed but no UI appears, use the iframe failure table in [Troubleshooting](TROUBLESHOOTING.md#salesforce-frame-is-blocked-by-the-mcp-client).
+
+## Browser-session checks confirmed on 23 November 2026
+
+The user confirmed Teams and Slack work in clean Firefox sessions without first signing into Salesforce. Chrome Incognito failed with a frame redirect to `www.salesforce.com`; allowing third-party cookies for the host site immediately restored loading. This verifies the tested environments, not every host/browser policy combination. A working MCP refresh token does not establish the Salesforce session used inside an iframe.
+
+Prefer the normal Salesforce-hosted loader for Slack demos where it works; keep **LO2 JS From Static Resource** off for that route. The checkbox is org-wide, so changing it also affects new widgets in other clients. Existing tabs may retain already-loaded scripts and sessions.
+
+An upstream Salesforce correction is anticipated based on the user's report, but no release date or removal of the workaround is verified here. Before retiring it, test the hosted loader in fresh sessions in each host, including the browser cookie policy. An origin fix does not by itself prove third-party-cookie independence.

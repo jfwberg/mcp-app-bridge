@@ -230,9 +230,8 @@ public with sharing class McpLightningOutService {
         result.loggingEnabled = McpDiagnostics.isEnabled();
         result.loaderUrl = orgOrigin + '/lightning/lightning.out.latest/index.iife.prod.js';
         if(McpBridgeCoreConfig.get().lo2JsFromStaticResource) {
-            String typeName=MCP_App_Bridge_Core_Config__mdt.SObjectType.getDescribe().getName();
-            String namespacePrefix=typeName.substringBefore('MCP_App_Bridge_Core_Config__mdt');
-            result.loaderUrl=orgOrigin+'/resource/'+namespacePrefix+'McpLo2Modified?v=2.2.5-origin-1';
+            // The authenticated HTML resource contains the modified loader. No browser URL is needed.
+            result.loaderUrl=null;
         }
         result.inputNames = lightningConfig.inputNames();
         result.eventMappings = McpEventMappingConfig.clientMappings(lightningConfig.key);

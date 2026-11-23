@@ -2,7 +2,7 @@
 
 ## Teams Lightning Out fails with invalid target origin 'null'
 
-**Local modified loader option (26 October 2026):** enable **LO2 JS From Static Resource** (`LO2_JS_FROM_STATIC_RESOURCE__c`) on **Setup → Custom Metadata Types → MCP App Bridge Core Configuration → Manage Records → Default**. This selects the packaged `McpLo2Modified` JavaScript resource. The setting is subscriber-controlled and defaults to false; disabled uses Salesforce's hosted latest loader. Start a fresh widget load after saving. Turn it off and start another fresh load to return to the hosted version.
+**Local modified loader option (26 October 2026):** enable **LO2 JS From Static Resource** (`LO2_JS_FROM_STATIC_RESOURCE__c`) on **Setup → Custom Metadata Types → MCP App Bridge Core Configuration → Manage Records → Default**. This embeds the packaged `McpLo2Modified` JavaScript in the authenticated MCP HTML response; it does not fetch the static-resource URL from the browser. The setting is subscriber-controlled and defaults to false; disabled uses Salesforce's hosted latest loader. Start a fresh widget load after saving. Turn it off and start another fresh load to return to the hosted version.
 
 Teams was observed hosting the widget inside an HTTPS renderer and an inner `srcdoc` iframe, both with `allow-same-origin`. In the inner document, `location.origin` is the string `"null"` because its URL is `about:srcdoc`, while `window.origin` is the valid inherited HTTPS renderer origin. This does not establish that Microsoft removed sandbox permissions or when its renderer changed.
 
@@ -10,7 +10,7 @@ The inspected LO2 2.2.5 loader assigns `loAppOrigin` from `window.location.origi
 
 The local modified version changes those two assignments to use the effective `window.origin`, validates that it is HTTP(S), and rejects an override that differs from the real effective origin. It does not remove message checks, use wildcard target origins, or make opaque origins usable. It still loads Salesforce authentication and component assets; it is a pinned loader, not a fully offline runtime.
 
-**Validation status:** the user confirmed successful component loading with the local modified loader in the standalone `srcdoc` reproduction on 26 October 2026. The updated managed package and Teams integration are awaiting live validation. Verify `COMPONENT_READY`, component inputs, events, and session behavior after installation. Existing OAuth and ancestor-domain setup requirements still apply.
+**Validation status (23 November 2026):** the user confirmed Teams and Slack loading in clean Firefox sessions without prior Salesforce sign-in. Chrome Incognito required a host-site third-party-cookie allowance. Verify `COMPONENT_READY`, inputs, events, and session behavior in your environment. Existing OAuth and ancestor-domain requirements still apply.
 
 Use the origin checkpoints in [Logging](LOGGING.md#browser-origin-investigation) to compare clients and group entries by the widget load Correlation ID. See [Setup](SETUP.md#local-modified-lo2-loader-for-teams) and [local modified loader maintenance](LO2-LOCAL-MODIFIED.md). The pinned local version does not automatically receive Salesforce loader updates.
 
@@ -146,8 +146,26 @@ The bridge deliberately does not include the signed assertion, access token, or 
 
 For JWT bearer flow, the bridge derives the assertion audience from `Organization.IsSandbox`: `https://test.salesforce.com` for sandbox and scratch orgs, otherwise `https://login.salesforce.com`. The token request itself uses the current org's My Domain. An `invalid_client` response normally means the configured consumer key does not identify the JWT-enabled ECA in that org.
 
-## Local LO2 static resource blocked by script-src
+## Historical external LO2 static resource blocked by script-src
+
+These external-fetch checks apply to older bridge versions or separately hosted test pages. The current embedded-loader route does not request the loader from a Salesforce static-resource URL.
 
 The local static-resource request can redirect from My Domain to the package-specific Visualforce host (for example, `https://ORG--mcpapp.vf.force.com`). When the local loader is enabled, MCP resource metadata includes that exact host in `ui.csp.resourceDomains`, resolved with Salesforce DomainCreator. Both resources/list and resources/read share this policy. Start a fresh widget/resource load after upgrading so the host receives the updated CSP; an already-mounted iframe retains its old policy. A script-src rejection for that host indicates missing or cached resource CSP metadata, not an OAuth failure.
 
 Static-resource requests can also pass through the Lightning origin's `/visualforce/session` endpoint before reaching the Visualforce resource. When the local loader is enabled, resourceDomains includes the Lightning origin as well. Inclusion in connectDomains or frameDomains alone does not permit a script redirect there. This addresses CSP only; if the session endpoint subsequently returns HTML, authentication or resource delivery still needs investigation.
+
+## Lightning Out library could not be loaded
+
+This exact message comes from the script element's error event, not from a console warning. In the former external static-resource route, Salesforce returned an HTML 404/login response instead of JavaScript. Firefox reported a MIME mismatch with `X-Content-Type-Options: nosniff`. Both My Domain and Visualforce resource URLs worked while signed into Salesforce and failed in anonymous sessions.
+
+Public cache control alone did not resolve this. Salesforce documents that View File resource URLs can depend on authentication when the server-side cache misses, even with Public caching. See [Salesforce's explanation](https://help.salesforce.com/s/articleView?id=000383810&language=en_US&type=1).
+
+The current solution reads the packaged loader server-side and includes it in the authenticated MCP HTML response only when **LO2 JS From Static Resource** is enabled. It adds approximately 27 KB, skips the separate browser fetch, and requires no public Site or new trusted domain for loader delivery. Disabled uses Salesforce's hosted loader as before. Upgrade the bridge and start a fresh widget; old mounted widgets retain their old HTML. If Network still shows `/resource/mcpapp__McpLo2Modified`, verify the installed version and whether an old widget/resource response is being reused.
+
+## Chrome redirects a Salesforce frame to www.salesforce.com
+
+In the tested Chrome Incognito session, a frame navigation toward `https://www.salesforce.com/` was blocked by the widget's `frame-src` policy. Allowing third-party cookies for the host site immediately restored loading. Firefox clean sessions already worked. The CSP message was a secondary symptom of the failed frame/session flow; do not add the public Salesforce website to the allowlist to suppress it.
+
+Chrome blocks third-party cookies in Incognito by default. Use its host-site cookie control to allow them where permitted, reload, and launch a fresh widget. See [Chrome's cookie instructions](https://support.google.com/chrome/answer/95647?hl=en). If it still fails, inspect DevTools Issues, blocked-cookie reasons, and document-request redirects. Capture status, Location, and final destination; redact credentials and frontdoor tokens.
+
+MCP OAuth refresh tokens authenticate server calls; they do not log the browser into the nested Salesforce frame. Existing Salesforce logins can mask this distinction. For regression checks, use clean sessions with the intended cookie policy and a fresh widget/frontdoor URL every time. Compare enabled and disabled loader modes separately rather than assuming a cache clear fixes authentication.

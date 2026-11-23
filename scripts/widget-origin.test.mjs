@@ -64,7 +64,7 @@ test('loader uses selected same-org resource, defaults to hosted, and rejects ot
   const definition=source.match(/const loadScript=([^\n]+);/)[1];
   const scripts=[];
   const load=runInNewContext('('+definition+')',{
-    URL, document:{createElement:()=>({addEventListener(name,callback){if(name==='load')this.loaded=callback;}}),head:{append(script){scripts.push(script);script.loaded();}}}
+    loadEmbeddedLoader:()=>false, URL, document:{createElement:()=>({addEventListener(name,callback){if(name==='load')this.loaded=callback;}}),head:{append(script){scripts.push(script);script.loaded();}}}
   });
   const org='https://example.my.salesforce.com';
   await load(org,org+'/resource/mcpapp__McpLo2Modified?v=2.2.5-origin-1');

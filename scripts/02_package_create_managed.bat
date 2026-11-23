@@ -12,7 +12,7 @@ SET definitionFile=config/project-scratch-def.json
 
 REM Package Config
 SET packageId=0HoP3000000021pKAA
-SET packageVersionId=04tP3000002Ke1lIAC
+SET packageVersionId=04tP3000002LdrdIAC
 
 REM Prevent protected sample records or locked App ID configuration from entering a package version.
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0Validate-PackageMetadata.ps1"
@@ -27,6 +27,6 @@ sf package version create --package "%packageName%"  --target-dev-hub "%devHub%"
 REM Optional lifecycle command reference - run separately when deliberately required:
 REM sf package delete --package %packageId% --target-dev-hub %devHub% --no-prompt
 REM sf package version delete --package %packageVersionId% --target-dev-hub %devHub% --no-prompt
-REM sf package version promote --package %packageVersionId% --target-dev-hub %devHub% --no-prompt
+sf package version promote --package %packageVersionId% --target-dev-hub %devHub% --no-prompt
 
-REM /packaging/installPackage.apexp?p0=04tP3000002Hk3hIAC
+REM /packaging/installPackage.apexp?p0=04tP3000002LdrdIAC

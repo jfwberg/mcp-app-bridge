@@ -66,6 +66,18 @@ private class McpLightningOutServiceTest {
         Assert.areEqual(new List<String>{orgOrigin,'https://example.lightning.force.com'},(List<String>)csp.get('connectDomains'));
     }
 
+    @IsTest static void shouldEmbedLoaderOnlyWhenEnabled() {
+        String template='<script>const load=()=>{/*__MCPAPP_EMBEDDED_LOADER__*/return false;};</script>';
+        McpBridgeCoreConfig.testRecord=new MCP_App_Bridge_Core_Config__mdt(LO2_JS_FROM_STATIC_RESOURCE__c=false);
+        Assert.areEqual('<script>const load=()=>{return false;};</script>',McpResourceRegistry.embedLoader(template));
+        McpBridgeCoreConfig.testRecord.LO2_JS_FROM_STATIC_RESOURCE__c=true;
+        String html=McpResourceRegistry.embedLoader(template);
+        Assert.isTrue(html.contains('modifiedLo2Origin'),'Enabled HTML must contain the packaged loader');
+        Assert.isTrue(html.contains('return true;'),'Widget must skip the external script fetch');
+        Assert.isFalse(html.contains('/*__MCPAPP_EMBEDDED_LOADER__*/'));
+        Assert.areEqual('custom template',McpResourceRegistry.embedLoader('custom template'));
+    }
+
     @IsTest static void shouldSelectHostedOrLocalModifiedLoader() {
         McpLightningOutService.testSessionId='test-session';
         McpLightningOutService.testOrgOrigin='https://example.my.salesforce.com';
@@ -75,8 +87,7 @@ private class McpLightningOutServiceTest {
         Assert.areEqual('https://example.my.salesforce.com/lightning/lightning.out.latest/index.iife.prod.js',hosted.loaderUrl);
         McpBridgeCoreConfig.testRecord.LO2_JS_FROM_STATIC_RESOURCE__c=true;
         McpLightningOutService.BootstrapConfig local=McpLightningOutService.createBootstrapConfig(config('example-component'));
-        String typeName=MCP_App_Bridge_Core_Config__mdt.SObjectType.getDescribe().getName();
-        Assert.areEqual('https://example.my.salesforce.com/resource/'+typeName.substringBefore('MCP_App_Bridge_Core_Config__mdt')+'McpLo2Modified?v=2.2.5-origin-1',local.loaderUrl);
+        Assert.isNull(local.loaderUrl,'Embedded loader must not require a browser resource URL');
         McpBridgeCoreConfig.testRecord=new MCP_App_Bridge_Core_Config__mdt();
         Assert.isFalse(McpBridgeCoreConfig.get().lo2JsFromStaticResource,'Unset option must keep the hosted loader');
     }

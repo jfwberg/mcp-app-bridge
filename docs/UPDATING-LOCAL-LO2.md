@@ -1,6 +1,6 @@
 # Update the local modified Lightning Out loader
 
-Use this procedure when Salesforce publishes a new LO2 loader, or periodically to check whether the hosted `latest` file has changed. The local copy is pinned; it does not update automatically. As of 26 October 2026, the user confirmed the local-loader setting works in Teams and the other tested clients, including Slack.
+Use this procedure when Salesforce publishes a new LO2 loader, or periodically to check whether the hosted `latest` file has changed. The local copy is pinned; it does not update automatically. On 23 November 2026, the user confirmed the embedded-loader path in clean Firefox sessions for Teams and Slack. Chrome required a host-site third-party-cookie allowance. Prefer the hosted-loader route for Slack demos where it works.
 
 ## 1. Download and identify the upstream version
 
@@ -68,7 +68,7 @@ The `.testdata` copy and browser reproduction helpers are local-only and ignored
 
 Keep `McpLo2Modified.resource-meta.xml` as JavaScript (`application/javascript`). Do not rename the resource without updating its consumers.
 
-## 5. Update version references and the cache key
+## 5. Update version references and embedded delivery
 
 Search the current references:
 
@@ -80,15 +80,15 @@ Update these as appropriate:
 
 | File | What to update |
 | --- | --- |
-| `force-app/main/default/classes/McpLightningOutService.cls` | Bump the resource URL's `?v=2.2.5-origin-1` key for every changed local build, including changes with the same upstream version. For example, use `2.2.5-origin-2` for a local revision or `NEW_VERSION-origin-1` for new upstream code. |
-| `force-app/main/default/classes/McpLightningOutServiceTest.cls` | Update the expected cache key in the loader-selection assertion. |
-| `scripts/widget-origin.test.mjs` | Update resource URL examples if changing the cache key. |
+| `force-app/main/default/classes/McpLightningOutService.cls` | Keep the hosted URL when disabled and no external loader URL when enabled. The modified loader is embedded by `McpResourceRegistry`, not fetched through a cache-key URL. |
+| `force-app/main/default/classes/McpLightningOutServiceTest.cls` | Keep checkbox selection and enabled/disabled HTML embedding tests. |
+| `scripts/widget-origin.test.mjs` | Preserve origin diagnostics and external-script origin checks. |
 | `scripts/lo2-loader.test.mjs` | Adjust structural assertions only when the reviewed patch structure changes; retain syntax, origin-safety, and absent-source-map checks against the packaged resource. |
 | `force-app/main/default/objects/MCP_App_Bridge_Core_Config__mdt/fields/LO2_JS_FROM_STATIC_RESOURCE__c.field-meta.xml` | Update the pinned version in description/help text if it changes. Keep the checkbox subscriber-controlled and default false. |
 | `force-app/main/default/staticresources/McpLo2Modified.resource-meta.xml` | Update its version description if it changes. |
 | `docs/LO2-LOCAL-MODIFIED.md`, `docs/SETUP.md`, and other Teams guidance | Record the new pinned version and actual validation results. Preserve dated historical observations. |
 
-The bootstrap resolves the resource namespace automatically. Do not hardcode an org hostname or namespace into the modified JavaScript.
+The resource registry reads the packaged static resource server-side. Do not hardcode an org hostname or namespace into the modified JavaScript.
 
 ## 6. Run local and Salesforce validation
 
@@ -106,12 +106,12 @@ In `.testdata/lo2/lo2-origin-repro.html`, select **Leave URL and attributes unch
 
 Use the normal package build/release process. After installing the update, enable **LO2 JS From Static Resource** on **Core Configuration → Default**, then create a fresh widget instance.
 
-Check Teams and Slack plus the other clients you support, with the setting enabled. Also check the default hosted-loader path with the setting disabled. Confirm the new resource cache key in Network tools, JavaScript response content, `COMPONENT_READY`, component inputs, events, and session behavior.
+Check Teams and Slack plus the other clients you support, with the setting enabled. Also check the default hosted-loader path with the setting disabled. With the checkbox enabled, confirm the `resources/read` HTML contains the modified loader and Network shows no separate request for `McpLo2Modified`. With it disabled, confirm the modified code is absent and the hosted loader is requested. Verify `COMPONENT_READY`, inputs, events, and session behavior using clean sessions, including Chrome cookie settings.
 
-If redirects or assets change, inspect the actual `resources/read` response and effective CSP. Current resource domains include the org's My Domain and files host; the local-loader option also allows Lightning and the package's Visualforce host. Resolve added hosts through Salesforce's domain APIs rather than introducing broad wildcards. A redirect through `/visualforce/session` must ultimately return usable JavaScript, not an HTML login page.
+If redirects or assets change, inspect the actual `resources/read` response and effective CSP. Current resource domains include the org's My Domain and files host; the local-loader option also allows Lightning and the package's Visualforce host. Resolve added hosts through Salesforce's domain APIs rather than introducing broad wildcards. There is no static-resource redirect in the embedded-loader route. Investigate remaining redirects as authentication/component requests; do not add `www.salesforce.com` to suppress a frame error.
 
 ## Rollback and review
 
-Turning off **LO2 JS From Static Resource** selects Salesforce's hosted loader on the next widget load, but that may reintroduce the original srcdoc issue if Salesforce has not fixed it. To restore a previous local build, restore its build recipe/generated files, assign a new cache key, and deploy/package through the normal process. Do not assume installed managed-package versions can be downgraded.
+Turning off **LO2 JS From Static Resource** selects Salesforce's hosted loader on the next widget load, but that may reintroduce the original srcdoc issue if Salesforce has not fixed it. To restore a previous local build, restore its build recipe/generated files, deploy/package through the normal process, and start fresh widgets to retrieve the new HTML. Do not assume installed managed-package versions can be downgraded.
 
 Before committing, review the source diff, keep credentials/frontdoor URLs out of tracked files, and record the upstream version/hash, patch changes, and client checks performed.

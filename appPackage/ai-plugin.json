@@ -199,45 +199,18 @@
               "description": "Financial Services process demo with KYC onboarding and Loan Application workflows. Returns compliance decisions and loan underwriting results to the MCP chat window.",
               "inputSchema": {
                 "type": "object",
-                "properties": {
-                  "clientName": {
-                    "type": "string",
-                    "description": "Pre-fill the client name in KYC and Loan forms."
-                  },
-                  "clientId": {
-                    "type": "string",
-                    "description": "CRM client identifier shown in the card header."
-                  },
-                  "startDate": {
-                    "type": "string",
-                    "format": "date",
-                    "description": "Process start date (YYYY-MM-DD). Defaults to today."
-                  },
-                  "initialTab": {
-                    "type": "string",
-                    "enum": [
-                      "kyc",
-                      "loan",
-                      "flow"
-                    ],
-                    "description": "Tab to open on load.",
-                    "default": "kyc"
-                  },
-                  "loanAmount": {
-                    "type": "integer",
-                    "description": "Pre-fill loan amount in euros."
-                  }
-                }
+                "properties": {},
+                "additionalProperties": false
               },
               "_meta": {
                 "ui": {
-                  "resourceUri": "ui://wt-fsc-process-demo/v1",
+                  "resourceUri": "ui://wt/fsc-process-demo/v1/index.html",
                   "visibility": [
                     "model",
                     "app"
                   ]
                 },
-                "ui/resourceUri": "ui://wt-fsc-process-demo/v1"
+                "ui/resourceUri": "ui://wt/fsc-process-demo/v1/index.html"
               },
               "securitySchemes": [
                 {
